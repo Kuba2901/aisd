@@ -2,46 +2,56 @@
 
 using namespace std;
 
-// Function to print the output
 void printPalindrome(int arr[], int n)
-{
-    int palindrome = 1;
+{	
+    int palindrome = 1; // Flaga
+	int j; // Iterator od tylu
 
     for (int i = 0; i < n; i++)
     {
-        if (!(arr[i] == arr[n-i-1])) {
+		j = (n-1)-i;
+
+		// Jesli indeksy "sie minely" to break bo juz sprawdzone
+		if (i >= j) {
+			break;
+		}
+		
+		// Porownywanie odpowiednich wartosci od przodu i tylu
+        if (!(arr[i] == arr[j])) {
             palindrome = 0;
             break;
         }
+
+		
     }    
 
+	// Jesli dana liczba jest palindromem to wypisujemt na ekran
     if (palindrome) {
-        cout << " ";
         for (int i = 0; i < n; i++) {
             cout << arr[i];
         }
     }
+
 }
 
-// Function to generate all binary strings
-void generateAllBinaryStrings(int n, int arr[], int i)
+void getAllBinaries(int n, int arr[], int i)
 {
 	if (i == n) {
 		printPalindrome(arr, n);
 		return;
 	}
 
-	// First assign "0" at ith position
+	// First assign "1" at ith position
 	// and try for all other permutations
 	// for remaining positions
 	arr[i] = 1;
-	generateAllBinaryStrings(n, arr, i + 1);
+	getAllBinaries(n, arr, i + 1);
 
-	// And then assign "1" at ith position
+	// And then assign "0" at ith position
 	// and try for all other permutations
 	// for remaining positions
 	arr[i] = 0;
-	generateAllBinaryStrings(n, arr, i + 1);
+	getAllBinaries(n, arr, i + 1);
 }
 
 // Driver Code
@@ -53,7 +63,7 @@ int main()
 
 	int arr[100];
 
-    generateAllBinaryStrings(n, arr, 0);
+    getAllBinaries(n, arr, 0);
 
 	return 0;
 }
