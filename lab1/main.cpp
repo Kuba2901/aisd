@@ -1,8 +1,9 @@
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 
-void printPalindrome(int arr[], int n)
+void printPalindrome(int bufforArray[], int n)
 {	
     int palindrome = 1; // Flaga
 	int j; // Iterator od tylu
@@ -17,7 +18,7 @@ void printPalindrome(int arr[], int n)
 		}
 		
 		// Porownywanie odpowiednich wartosci od przodu i tylu
-        if (!(arr[i] == arr[j])) {
+        if (!(bufforArray[i] == bufforArray[j])) {
             palindrome = 0;
             break;
         }
@@ -25,45 +26,50 @@ void printPalindrome(int arr[], int n)
 		
     }    
 
-	// Jesli dana liczba jest palindromem to wypisujemt na ekran
+	// Jesli dana liczba jest palindromem to wypisujemy na ekran
     if (palindrome) {
         for (int i = 0; i < n; i++) {
-            cout << arr[i];
+            cout << bufforArray[i];
         }
+
+		// cout << "	";
     }
 
 }
 
-void getAllBinaries(int n, int arr[], int i)
-{
-	if (i == n) {
-		printPalindrome(arr, n);
+void getAllBinaries(int iterator, int *bufforArray, int n) {
+	// Zwijamy funkcje jesli iterator osiagnal koniec ciagu bitowego
+	if (iterator == n) {
+		printPalindrome(bufforArray, n);
 		return;
 	}
 
-	// First assign "1" at ith position
-	// and try for all other permutations
-	// for remaining positions
-	arr[i] = 1;
-	getAllBinaries(n, arr, i + 1);
+	// Iterator dla rekurencji
+	int j = iterator + 1;
 
-	// And then assign "0" at ith position
-	// and try for all other permutations
-	// for remaining positions
-	arr[i] = 0;
-	getAllBinaries(n, arr, i + 1);
+	// Początkowo ustawiamy 1, żeby otrzymywac wszystkie permutacje z 1 na początku
+	bufforArray[iterator] = 1;
+	getAllBinaries(j, bufforArray, n);
+
+	// Pozniej ustawiamy 0, analogicznie do 1
+	bufforArray[iterator] = 0;
+	getAllBinaries(j, bufforArray, n);
 }
 
-// Driver Code
-int main()
-{
+int main() {
+	//  n - długość ciągow bitowych
 	int n;
 
     cin >> n;
 
-	int arr[100];
+	// Dynamicznie alokowana tablica, do ktorej zapisywane beda kombinacje
+	int* bufforArray = (int*)malloc(sizeof(int)*pow(2,n));
 
-    getAllBinaries(n, arr, 0);
+    getAllBinaries(0, bufforArray, n);
+
+	if (bufforArray != nullptr) {
+		free(bufforArray);
+	}
 
 	return 0;
 }
