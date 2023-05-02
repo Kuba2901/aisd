@@ -1,0 +1,24 @@
+1. Klasa Point o polach:
+    - int x, y
+    - char character
+    - bool visited
+
+2. Klasa CustomString
+
+3. Klasa City o polach:
+    - CustomString nazwa
+    - Point exit
+
+4. Klasa CustomVector
+
+5. Klasa CustomQueue oparta o CustomVector
+
+5. Klasa procesora zawierajaca wszelkie operacje, pola to:
+    - int height, width
+    - Array 2D obiektow klasy Point (sluzacy jako mapa)
+    - CustomVector cities
+    
+
+Plan dzialania
+1. Wczytanie rozmiarow mapy
+2. Wczytanie mapy i obiektow Point

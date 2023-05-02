@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.html": "html",
+        "iosfwd": "cpp",
         "__bit_reference": "cpp",
         "__bits": "cpp",
         "__config": "cpp",
@@ -40,7 +41,6 @@
         "exception": "cpp",
         "initializer_list": "cpp",
         "ios": "cpp",
-        "iosfwd": "cpp",
         "iostream": "cpp",
         "istream": "cpp",
         "limits": "cpp",

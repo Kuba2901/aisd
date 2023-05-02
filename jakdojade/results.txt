@@ -1,0 +1,8 @@
+CITY { GDANSK, exit: (9, 1)}
+CITY { SZCZECIN, exit: (0, 4)}
+CITY { WARSZAWA, exit: (13, 8)}
+CITY { WROCLAW, exit: (4, 14)}
+CITY { KIELCE, exit: (12, 14)}
+CITY { OPOLE, exit: (6, 16)}
+CITY { KRAKOW, exit: (10, 17)}
+7
