@@ -102,4 +102,21 @@ public:
     {
         return size;
     }
+
+        T* begin() {
+        return array;
+    }
+
+    const T* begin() const {
+        return array;
+    }
+
+    T* end() {
+        return array + size;
+    }
+
+    const T* end() const {
+        return array + size;
+    }
+
 };

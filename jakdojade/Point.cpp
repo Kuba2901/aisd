@@ -9,6 +9,15 @@ Point::Point()
     this->y = -1;
 }
 
+
+Point::Point(int x_, int y_)
+{
+    this->character = 0;
+    this->visited = false;
+    this->x = x_;
+    this->y = y_;
+}
+
 Point::Point(int x_, int y_, char character_)
 {
     this->visited = false;
@@ -66,5 +75,5 @@ void Point::toString()
 }
 
 bool Point::isTraversable() {
-    return (character != '.');
+    return !(character == '.' || (character >= 65 && character <= 90));
 }

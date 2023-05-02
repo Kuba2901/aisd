@@ -3,6 +3,9 @@
 #include "CustomVector.h"
 #include "CustomQueue.h"
 #include "City.h"
+#include "BFSPoint.h"
+#include "CityDistance.h"
+
 
 class Processor
 {
@@ -14,6 +17,9 @@ class Processor
 
     // Map dimensions
     int height, width;
+
+    // Vector of cities with distances
+    CustomVector<CityDistance* > citiesDistance;
 
 public:
     Processor();
@@ -42,6 +48,8 @@ public:
     // Check if the point is in bounds of the map
     virtual bool inBounds(Point *pt);
 
-    virtual int bfs(Point* start, Point* end);
+    virtual int bfs();
+
+    virtual CustomVector<BFSPoint *> getNeighbors(BFSPoint *p);
 
 };

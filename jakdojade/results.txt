@@ -1,8 +1,6 @@
-CITY { GDANSK, exit: (9, 1)}
-CITY { SZCZECIN, exit: (0, 4)}
-CITY { WARSZAWA, exit: (13, 8)}
-CITY { WROCLAW, exit: (4, 14)}
-CITY { KIELCE, exit: (12, 14)}
-CITY { OPOLE, exit: (6, 16)}
-CITY { KRAKOW, exit: (10, 17)}
-7
+Distance between GDANSK and SZCZECIN = 11
+Distance between GDANSK and WARSZAWA = 22
+Distance between SZCZECIN and WROCLAW = 16
+Distance between SZCZECIN and KIELCE = 24
+Distance between KIELCE and KRAKOW = 5
+Distance between KIELCE and OPOLE = 26

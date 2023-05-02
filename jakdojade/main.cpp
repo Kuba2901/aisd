@@ -6,7 +6,7 @@ int main()
     processor->GetDimensions();
     processor->LoadMap();
     processor->FindCities();
-    processor->PrintCities();
-    
+    processor->bfs();
+
     return 0;
 }

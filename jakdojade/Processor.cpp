@@ -96,7 +96,6 @@ Point *Processor::FindAsterisk(int x, int y, CustomString &cityName)
             {
                 if (map[y - 1][i].GetCharacter() == '*')
                 {
-
                     pos->SetX(i);
                     pos->SetY(y - 1);
                     return pos;
@@ -114,7 +113,8 @@ Point *Processor::FindAsterisk(int x, int y, CustomString &cityName)
             {
                 if (map[y + 1][i].GetCharacter() == '*')
                 {
-                    pos->SetX(x);
+
+                    pos->SetX(i);
                     pos->SetY(y + 1);
                     return pos;
                 }
@@ -192,10 +192,6 @@ Point *Processor::FindAsterisk(int x, int y, CustomString &cityName)
 
 void Processor::FindCities()
 {
-    // Initialize cities
-    // this->cities = CustomVector<City*>();
-
-
     for (int y = 0; y < height; y++)
     {
         for (int x = 0; x < width; x++)
@@ -234,76 +230,113 @@ void Processor::PrintCities() {
     
 }
 
-bool Processor::inBounds(Point *pt) {
-    return (pt->GetX() >= 0 && pt->GetX() < width && pt->GetY() >= 0 && pt->GetY() < height);
+
+
+// Getting neighbours
+CustomVector<BFSPoint *> Processor::getNeighbors(BFSPoint *bfsP) {
+    CustomVector<BFSPoint *> neighbors;
+    Point *p = bfsP->GetPoint();
+
+    for (int dx = -1; dx <= 1; ++dx) {
+        for (int dy = -1; dy <= 1; ++dy) {
+
+            if (dx != dy && !(dx == -1 && dy == 1 ) && !(dx == 1 && dy == -1)) {
+                int x_ = p->GetX() + dx;
+                int y_ = p->GetY() + dy;
+
+                Point *temp = new Point(x_, y_);
+
+                if (inBounds(temp)) {
+                    Point *neighbor = &(map[y_][x_]);
+                    BFSPoint *nb = new BFSPoint(neighbor, 0);
+
+                    if (neighbor->isTraversable())  {
+                        neighbors.push_back(nb);
+                    }
+                        
+                }
+            
+            }
+
+        }
+    }
+    return neighbors;
 }
 
 // BFS function to find distances between chosen points
-int Processor::bfs(Point* start, Point* end)
-{
-    // Initialize visited array
-    bool** visited = new bool*[height];
-    for (int i = 0; i < height; i++)
+int Processor::bfs()
+{       
+    
+
+    // Struct to hold the city object and custom vector of cities and distances
+    for (int cityNum = 0; cityNum < cities.getSize(); cityNum++)
     {
-        visited[i] = new bool[width];
-        for (int j = 0; j < width; j++)
-        {
-            visited[i][j] = false;
-        }
-    }
+        // Clear values of visited points
+        // for (int y = 0; y < height; y++)
+        // {
+        //     for (int x = 0; x < width; x++)
+        //     {
+        //         // Set all to non-visited
+        //         map[y][x].SetVisited(false);
+        //     }
+        // }
 
-    // Initialize queue
-    CustomQueue<Point> q;
-    q.push(*start);
-    visited[start->GetY()][start->GetX()] = true;
-    start->SetVisited(true);
+        // Define a queue
+        CustomQueue<BFSPoint *> q;
 
-    // Initialize distance array
-    CustomVector<CustomVector<int>> dist(height, CustomVector<int>(width, -1));
-    dist[start->GetY()][start->GetX()] = 0;
+        // mark as visited
+        cities[cityNum]->GetPoint()->SetVisited(true);
 
-    // BFS loop
-    while (!q.empty())
-    {
-        Point curr = q.front();
-        q.pop();
+        // Push the first city
+        BFSPoint *start = new BFSPoint(cities[cityNum]->GetPoint(), 0);
 
-        // Check if we've reached the end point
-        if (curr.GetX() == end->GetX() && curr.GetY() == end->GetY())
-        {
-            std::cout << "Distance from (" << start->GetX() << "," << start->GetY() << ") to (" 
-                      << end->GetX() << "," << end->GetY() << "): " << dist[end->GetX()][end->GetY()] << std::endl;
-            break;
-        }
+        q.push(start);
 
-        // Iterate over neighboring points
-        int dx[] = {0, 0, 1, -1};
-        int dy[] = {1, -1, 0, 0};
-        for (int i = 0; i < 4; i++)
-        {
-            int x = curr.GetX() + dx[i];
-            int y = curr.GetY() + dy[i];
+        // Loop over the map until the queue is empty
+        while (!q.empty()) {
+            bool cityFound = false;
 
-            // Check if neighboring point is valid and not visited
-            if (x >= 0 && x < height && y >= 0 && y < width && map[y][x].isTraversable() && !visited[y][x])
+            // Get the first point
+            BFSPoint *currBfs = q.front();
+            Point *curr = currBfs->GetPoint();
+            q.pop();
+
+            for (int i = 0; i < cities.getSize(); i++)
             {
-                Point neighbor = map[x][y];
-                q.push(neighbor);
-                visited[y][x] = true;
-                neighbor.SetVisited(true);
-                dist[y][x] = dist[curr.GetY()][curr.GetX()] + 1;
+                if (cities[cityNum]->GetPoint()->GetX() == curr->GetX() && cities[cityNum]->GetPoint()->GetY() == curr->GetY()) 
+                    currBfs->SetDistance(0);
+                else if (cities[i]->GetPoint()->GetX() == curr->GetX() && cities[i]->GetPoint()->GetY() == curr->GetY()) {
+                    cityFound = true;
+                    std::cout << "Distance between " << cities[cityNum]->GetName()->GetString() << " and " << cities[i]->GetName()->GetString() << " = " << currBfs->GetDistance() << std::endl;
+                    citiesDistance.push_back(new CityDistance(cities[cityNum], currBfs->GetDistance()));
+                    break;
+                }
             }
+
+            if (!cityFound) {
+                // Loop over the neighbors
+                for (BFSPoint *neighbor: getNeighbors(currBfs))
+                {
+                    if (!neighbor->GetPoint()->GetVisited()) {
+                        neighbor->SetDistance(currBfs->GetDistance() + 1);
+                        q.push(neighbor);
+                        neighbor->GetPoint()->SetVisited(true);
+                    }
+
+                }        
+            }
+            
         }
     }
 
-    // Free memory
-    // for (int i = 0; i < height; i++)
-    // {
-    //     delete[] visited[i];
-    // }
-    // delete[] visited;
+    
+    
 }
 
 CustomVector<City *>*Processor::GetCities() {
     return &this->cities;
+}
+
+bool Processor::inBounds(Point *pt) {
+    return (pt->GetX() >= 0 && pt->GetX() < width && pt->GetY() >= 0 && pt->GetY() < height);
 }

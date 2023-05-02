@@ -8,6 +8,7 @@ class Point
 
 public:
     Point();
+    Point(int x_, int y_);
     Point(int x_, int y_, char character_);
     Point(int x_, int y_, bool visited_, char character_);
 
