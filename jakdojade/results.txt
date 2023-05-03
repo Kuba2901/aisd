@@ -7,7 +7,3 @@ Distance between KIELCE and OPOLE = 26
 Source id: 4, destination index: 6
 5 
 Source id: 6, destination index: 0
-40 
-Source id: 6, destination index: 0
-40 Type 1
-GDANSK 

@@ -376,28 +376,43 @@ PQElement Processor::dijkstra(int source, int destination) {
     distances[source].ids.push_back(source); // add source ID to its route
 
     // Create priority queue
-    CustomQueue<int> pq;
+    CustomQueue<PQElement> pq;
     pq.push(source);
 
     // Traverse graph
     while (!pq.empty()) {
         // Get vertex with minimum distance from priority queue
-        int u = pq.front();
+        PQElement u = pq.front();
         pq.pop();
 
         // Mark vertex as visited
-        visited[u] = true;
+        visited[u.i] = true;
 
         // Update distance of neighboring vertices
-        for (int i = 0; i < vertices[u]->neighbors.getSize(); ++i) {
-            int v = vertices[u]->neighbors[i].neighbor;
-            int weight = vertices[u]->neighbors[i].weight;
+        for (int i = 0; i < vertices[u.i]->neighbors.getSize(); ++i) {
+            // iterate over neighbors
+            int v = vertices[u.i]->neighbors[i].neighbor;
 
-            if (!visited[v] && distances[u].i != 1000000 && distances[u].i + weight < distances[v].i) {
-                distances[v].i = distances[u].i + weight;
-                distances[v].ids.push_back(v);
+            // Get the weight of each edge
+            int weight = vertices[u.i]->neighbors[i].weight;
 
-                pq.push(v);
+            // Get the id of the vertice
+            int id = vertices[u.i]->id;
+
+            // Check if theres a shorter route
+            if (!visited[v] && distances[u.i].i != 1000000 && distances[u.i].i + weight < distances[v].i) {
+                // Update the edge weight
+                distances[v].i = distances[u.i].i + weight;
+                distances[v].ids.push_back(id);
+
+                for (int k = 0; k < distances[u.i].ids.getSize(); k++)
+                {
+                    distances[v].ids.push_back(distances[u.i].ids[k]);
+                }
+                
+
+                PQElement elem{v};
+                pq.push(elem);
             }
         }
     }    
