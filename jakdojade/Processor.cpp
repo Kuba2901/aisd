@@ -362,19 +362,18 @@ bool Processor::inBounds(Point *pt) {
 }
 
 PQElement Processor::dijkstra(int source, int destination) {
-    const int num_vertices = cities.getSize();
-    
     // Set up distances and visited array
+    const int num_vertices = cities.getSize();
     PQElement distances[num_vertices];
     bool visited[num_vertices];
 
     for (int i = 0; i < num_vertices; ++i) {
         distances[i].i = 1000000;
-        visited[i] = false;
     }
 
     // Set distance to source vertex as 0
     distances[source].i = 0;
+    distances[source].ids.push_back(source); // add source ID to its route
 
     // Create priority queue
     CustomQueue<int> pq;
@@ -394,16 +393,9 @@ PQElement Processor::dijkstra(int source, int destination) {
             int v = vertices[u]->neighbors[i].neighbor;
             int weight = vertices[u]->neighbors[i].weight;
 
-            if (!visited[v] && distances[u].i != 1000000 &&
-                distances[u].i + weight < distances[v].i) {
+            if (!visited[v] && distances[u].i != 1000000 && distances[u].i + weight < distances[v].i) {
                 distances[v].i = distances[u].i + weight;
-                
-                // Add route
-                for (int routeElement = 0; routeElement < distances[u].ids.getSize(); routeElement++)
-                {
-                    distances[v].ids.push_back(distances[u].ids[routeElement]);
-                }
-                
+                distances[v].ids.push_back(v);
 
                 pq.push(v);
             }
@@ -412,6 +404,8 @@ PQElement Processor::dijkstra(int source, int destination) {
 
     return distances[destination];
 }
+
+
 
 
 void Processor::GetFlights() {

@@ -59,24 +59,23 @@ public:
         return *this;
     }
 
-
-    // ~CustomVector()
-    // {
-    //     delete[] array;
-    // }
-
-    void push_back(T value)
-    {
-        if (size == capacity)
-        {
-            capacity *= 2;
-            T *temp = new T[capacity];
-            memcpy(temp, array, size * sizeof(T));
-            delete[] array;
-            array = temp;
+    void push_back(T value) {
+        if (size >= capacity) {
+            resize(2 * capacity);
         }
 
-        array[size++] = value;
+        array[size] = value;
+        size++;
+    }
+
+    void resize(int new_capacity) {
+        T* new_array = new T[new_capacity];
+        for (int i = 0; i < size; i++) {
+            new_array[i] = array[i];
+        }
+        delete[] array;
+        array = new_array;
+        capacity = new_capacity;
     }
 
     void pop_back()
@@ -118,4 +117,12 @@ public:
     const T* end() const {
         return array + size;
     }
+
+    void clear() {
+        size = 0;
+        capacity = 0;
+        // delete[] array;
+        array = nullptr;
+    }
+
 };

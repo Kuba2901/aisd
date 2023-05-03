@@ -15,7 +15,10 @@ struct PQElement {
 
     PQElement(): i(0) {}
     PQElement(int i_): i(i_) {}
+    bool operator<(const PQElement& other) const { return i > other.i; }
+
 };
+
 
 class Processor
 {
