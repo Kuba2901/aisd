@@ -5,7 +5,17 @@
 #include "City.h"
 #include "BFSPoint.h"
 #include "CityDistance.h"
+#include "Djikstra.h"
+#include "CustomHashMap.h"
 
+// Struct to keep track of the route
+struct PQElement {
+    int i;
+    CustomVector<int> ids;
+
+    PQElement(): i(0) {}
+    PQElement(int i_): i(i_) {}
+};
 
 class Processor
 {
@@ -18,8 +28,11 @@ class Processor
     // Map dimensions
     int height, width;
 
-    // Vector of cities with distances
-    CustomVector<CityDistance* > citiesDistance;
+    // Vertices array
+    CustomVector<Vertex *> vertices;
+
+    // number of questions
+    int questionCount;
 
 public:
     Processor();
@@ -52,4 +65,11 @@ public:
 
     virtual CustomVector<BFSPoint *> getNeighbors(BFSPoint *p);
 
+    virtual PQElement dijkstra(int source, int destination);
+
+    virtual void GetFlights();
+
+    virtual int FindCityIndex(char* name);
+
+    virtual void GetResults();
 };

@@ -7,6 +7,8 @@ int main()
     processor->LoadMap();
     processor->FindCities();
     processor->bfs();
+    processor->GetFlights();
+    processor->GetResults();
 
     return 0;
 }

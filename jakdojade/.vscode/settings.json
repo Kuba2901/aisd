@@ -81,6 +81,7 @@
         "unordered_set": "c",
         "valarray": "c",
         "ranges": "c",
-        "stacktrace": "c"
+        "stacktrace": "c",
+        "__string": "cpp"
     }
 }

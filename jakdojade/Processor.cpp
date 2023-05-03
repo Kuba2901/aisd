@@ -31,7 +31,6 @@ void Processor::GetDimensions()
 
 void Processor::LoadMap()
 {
-
     // Allocate the memory
     map = new Point *[height];
     for (int i = 0; i < height; i++)
@@ -40,12 +39,13 @@ void Processor::LoadMap()
     }
 
     // Load and fill the map
-    char c = getchar();
+    char c;
     int x = 0;
     int y = 0;
 
     while (c != EOF && y < height)
     {
+        c = getchar();
 
         if (c != '\n')
         {
@@ -63,7 +63,6 @@ void Processor::LoadMap()
             y++;
         }
 
-        c = getchar();
     }
 }
 
@@ -265,21 +264,29 @@ CustomVector<BFSPoint *> Processor::getNeighbors(BFSPoint *bfsP) {
 
 // BFS function to find distances between chosen points
 int Processor::bfs()
-{       
-    
+{           
 
-    // Struct to hold the city object and custom vector of cities and distances
+    const int num_vertices = cities.getSize();
+    
+    for (int i = 0; i < num_vertices; i++) {
+        vertices.push_back(new Vertex);
+        vertices[i]->id = i;
+    }
+
+    // Initialize edge_weights array
+    int edge_weights[num_vertices][num_vertices];
+
+    for (int i = 0; i < num_vertices; i++) {
+        for (int j = 0; j < num_vertices; j++) {
+            edge_weights[i][j] = 1000000;
+            edge_weights[j][i] = 1000000;
+        }
+    }
+
+
+
     for (int cityNum = 0; cityNum < cities.getSize(); cityNum++)
     {
-        // Clear values of visited points
-        // for (int y = 0; y < height; y++)
-        // {
-        //     for (int x = 0; x < width; x++)
-        //     {
-        //         // Set all to non-visited
-        //         map[y][x].SetVisited(false);
-        //     }
-        // }
 
         // Define a queue
         CustomQueue<BFSPoint *> q;
@@ -308,7 +315,11 @@ int Processor::bfs()
                 else if (cities[i]->GetPoint()->GetX() == curr->GetX() && cities[i]->GetPoint()->GetY() == curr->GetY()) {
                     cityFound = true;
                     std::cout << "Distance between " << cities[cityNum]->GetName()->GetString() << " and " << cities[i]->GetName()->GetString() << " = " << currBfs->GetDistance() << std::endl;
-                    citiesDistance.push_back(new CityDistance(cities[cityNum], currBfs->GetDistance()));
+
+                    // Add to edge weights array
+                    edge_weights[cityNum][i] = currBfs->GetDistance();
+                    edge_weights[i][cityNum] = currBfs->GetDistance();
+
                     break;
                 }
             }
@@ -330,7 +341,16 @@ int Processor::bfs()
     }
 
     
-    
+    // Create the adjacency list
+    for (int i = 0; i < num_vertices; i++) {
+        for (int j = 0; j < num_vertices; j++) {
+            int weight = edge_weights[i][j];
+            if (weight != 0) {
+                Edge neighbor = {j, weight};
+                vertices[i]->neighbors.push_back(neighbor);
+            }
+        }
+    }
 }
 
 CustomVector<City *>*Processor::GetCities() {
@@ -339,4 +359,145 @@ CustomVector<City *>*Processor::GetCities() {
 
 bool Processor::inBounds(Point *pt) {
     return (pt->GetX() >= 0 && pt->GetX() < width && pt->GetY() >= 0 && pt->GetY() < height);
+}
+
+PQElement Processor::dijkstra(int source, int destination) {
+    const int num_vertices = cities.getSize();
+    
+    // Set up distances and visited array
+    PQElement distances[num_vertices];
+    bool visited[num_vertices];
+
+    for (int i = 0; i < num_vertices; ++i) {
+        distances[i].i = 1000000;
+        visited[i] = false;
+    }
+
+    // Set distance to source vertex as 0
+    distances[source].i = 0;
+
+    // Create priority queue
+    CustomQueue<int> pq;
+    pq.push(source);
+
+    // Traverse graph
+    while (!pq.empty()) {
+        // Get vertex with minimum distance from priority queue
+        int u = pq.front();
+        pq.pop();
+
+        // Mark vertex as visited
+        visited[u] = true;
+
+        // Update distance of neighboring vertices
+        for (int i = 0; i < vertices[u]->neighbors.getSize(); ++i) {
+            int v = vertices[u]->neighbors[i].neighbor;
+            int weight = vertices[u]->neighbors[i].weight;
+
+            if (!visited[v] && distances[u].i != 1000000 &&
+                distances[u].i + weight < distances[v].i) {
+                distances[v].i = distances[u].i + weight;
+                
+                // Add route
+                for (int routeElement = 0; routeElement < distances[u].ids.getSize(); routeElement++)
+                {
+                    distances[v].ids.push_back(distances[u].ids[routeElement]);
+                }
+                
+
+                pq.push(v);
+            }
+        }
+    }    
+
+    return distances[destination];
+}
+
+
+void Processor::GetFlights() {
+    int flightsNum = 0;
+    std::cin >> flightsNum;
+
+    for (int i = 0; i < flightsNum; i++)
+    {
+        CustomString buff;
+        std::cin >> buff;
+
+
+        char *token = std::strtok(buff.GetString(), " ");
+
+
+        int source = FindCityIndex(token);
+        int destination;
+        int time;
+
+        int j = 0;
+
+        while (token != nullptr)
+        {
+            token = std::strtok(nullptr, " ");
+
+            // destination
+            if (j == 0)
+            {
+                destination = FindCityIndex(token);
+            } 
+            // time
+            else {
+                time = atoi(token);
+            }
+
+            j++;
+        }
+
+        vertices[source]->neighbors.push_back(Edge{destination, time});
+        vertices[destination]->neighbors.push_back(Edge{source, time});
+    }    
+}
+
+int Processor::FindCityIndex(char* name) {
+    for (int i = 0; i < cities.getSize(); i++)
+    {
+        if (cities[i]->GetName()->Compare(name) ) {
+            return i;
+        }
+    }
+
+    return NULL;
+}
+
+
+void Processor::GetResults() {
+    int questions = 0;
+    std::cin >> questions;
+
+    for (int i = 0; i < questions; i++)
+    {
+        char from[20], to[20];
+        int type;
+
+        // Get the input
+        std::cin >> from >> to >> type;
+
+        int source = FindCityIndex(from);
+        int destination = FindCityIndex(to);
+
+        std::cout << "Source id: " << source << ", destination index: " << destination << std::endl;
+        
+        PQElement time = dijkstra(source, destination);
+        
+        std::cout << time.i << " ";
+
+        if (type == 1) {
+            std::cout << "Type 1" << std::endl;
+            for (int routeElement = 0; routeElement < time.ids.getSize(); routeElement++)
+            {
+                int id = time.ids[routeElement];
+                std::cout << cities[id]->GetName()->GetString() << " ";
+            }
+            
+        }
+
+        std::cout << std::endl;
+    }
 }

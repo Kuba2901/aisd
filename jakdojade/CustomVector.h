@@ -118,5 +118,4 @@ public:
     const T* end() const {
         return array + size;
     }
-
 };

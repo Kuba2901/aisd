@@ -4,3 +4,10 @@ Distance between SZCZECIN and WROCLAW = 16
 Distance between SZCZECIN and KIELCE = 24
 Distance between KIELCE and KRAKOW = 5
 Distance between KIELCE and OPOLE = 26
+Source id: 4, destination index: 6
+5 
+Source id: 6, destination index: 0
+40 
+Source id: 6, destination index: 0
+40 Type 1
+
