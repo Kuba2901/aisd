@@ -64,7 +64,7 @@ public:
     // Check if the point is in bounds of the map
     virtual bool inBounds(Point *pt);
 
-    virtual int bfs();
+    virtual void bfs();
 
     virtual CustomVector<BFSPoint *> getNeighbors(BFSPoint *p);
 

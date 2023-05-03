@@ -35,9 +35,9 @@ public:
 
 
     CustomVector(const CustomVector &other)
-        : size(other.size), array(new T[size])
+        : size(other.size), array(new T[other.size])
     {
-        for (int i = 0; i < size; ++i)
+        for (int i = 0; i < other.size; ++i)
         {
             array[i] = other.array[i];
         }
@@ -58,6 +58,21 @@ public:
         }
         return *this;
     }
+
+    void push_front(T value) {
+        if (size >= capacity) {
+            resize(2 * capacity);
+        }
+
+        for (int i = size; i > 0; i--)
+        {
+            array[i] = array[i - 1];
+        }
+
+        array[0] = value;
+        size++;
+    }
+
 
     void push_back(T value) {
         if (size >= capacity) {
