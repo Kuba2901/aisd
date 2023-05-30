@@ -5,6 +5,7 @@
 #include "indexed_field.h"
 #include <sstream>
 #include <unordered_map>
+#include "mapPoint.h"
 
 
 class BoardPieces {
@@ -16,7 +17,7 @@ class BoardPieces {
     int remainingBlack;
 
     // Reindexed fields of the map
-    std::unordered_map<int, std::string> boardFields;
+    std::unordered_map<std::string, Point *> boardMap;
 
     public:
         BoardPieces() {
@@ -155,26 +156,44 @@ class BoardPieces {
 
             int yCounter = 0;
             int xCounter = 0;
+            int wordCounter = 0;
 
             for (int y = 0; y < boardPieces.size(); y++)
             {
+                // Second half
+                if (y > S) {
+                    wordCounter++;
+                }
+
                 for (size_t i = 0; i < boardPieces[y].size(); i++)
                 {
                     std::vector<Point *> pointRow = boardPieces[y];
                     Point *curr = pointRow[i];
+
                     
                     if (i <= 3*S-yCounter) {
                         if (curr->c != ' ') {
                             // Start counting
                             if (xCounter == 0) {
-                                xCounter = y <= S - 1 ? i + 1: 1;
+                                xCounter = (y <= S - 1) ? (i + 1): 1;
                             } 
                             // Increment the counter
                             else {
                                 xCounter++;
                             }
 
-                            printf("%d", xCounter);
+                            char character = c + wordCounter;
+                            int index = xCounter;
+
+                            std::string key;
+                            key += character;
+                            key += std::to_string(index);
+
+                            insertToTheMap(key, curr);
+
+                            printf("%c%d", character, index);
+                            
+                            c++;
 
                         } else printf("%c", curr->c);
                         
@@ -182,7 +201,19 @@ class BoardPieces {
                     // After the line
                     else {
                         if (curr->c != ' ') {
-                            printf("%d", xCounter);
+                            char character = c + wordCounter;
+                            int index = xCounter;
+
+                            std::string key;
+                            key += character;
+                            key += std::to_string(index);
+
+                            insertToTheMap(key, curr);
+
+                            // printf("%c%d", character, index);
+                            std::cout << key;
+                            c++;
+
                         } else {
                             printf("%c", curr->c);
                         }
@@ -193,7 +224,208 @@ class BoardPieces {
 
                 yCounter++;
                 xCounter = 0;
+
+                // Reset the character
+                c = 'a';
             }
+        }
+
+        void insertToTheMap(std::string key, Point *val) {
+            boardMap[key] = val;
+        }
+
+        void printField(std::string key) {
+            bool exists = boardMap.count(key);
+
+            if (exists) {
+                Point *curr = boardMap[key];
+                std::cout << "FOUND: " << curr->c << std::endl;
+            } else {
+                std::cout << "DOES not EXIST" << std::endl;
+            }
+        }
+
+        bool entryExists(std::string key) {
+            return boardMap.count(key);
+        }
+
+        bool compareIndexes(std::string key1, std::string key2) {
+            if (entryExists(key1) && entryExists(key2)) {
+                // Get indexes from the keys
+                int index1 = stoi(key1.substr(1));
+                int index2 = stoi(key2.substr(1));
+
+                return abs(index1 - index2) <= 1;
+            }
+
+            return false;
+        }
+
+        bool isEdge(int S, std::string key1) {
+            // Get information from string 1
+            char c1 = key1[0];
+            int index1 = stoi(key1.substr(1));
+
+            // Last letter
+            char last = 'a' + 2*S;
+            int lastMaxIndex = S + 1;
+
+            // Top edge
+            int constValue = ('a' - (S + 1));
+            int currValue = c1 - index1;
+
+            // Check letter
+            if ((c1 == 'a' || c1 == last) && (index1 > 0 && index1 <= S+1)) {
+                // printf("A OR LAST");
+                return true;
+            }
+
+            // Index equal to 1
+            if (index1 == 1) {
+                // printf("INDEX EQUAL TO 1");
+                return true;
+            }
+
+            // Delta equal to constValue
+            if (currValue == constValue) {
+                // printf("DELTA EQUAL CONSTVALUE");
+                return true;
+            } 
+
+            // Right top corner - multiple comparisons
+            int letterDelta = last - c1;
+            int indexDelta = index1 - lastMaxIndex;
+
+            if (letterDelta == indexDelta) {
+                // printf("TOP RIGHT");
+                return true;
+            }
+
+            // printf("CENTER, constValue: %d", constValue);
+            return false;
+        }
+
+        bool isCorner(int S, std::string key) {
+            // Get information from the string key
+            char c1 = key[0];
+            int index = stoi(key.substr(1));
+
+            // Determine the max index for the first and last letter
+            int flMaxIndex = S+1;
+
+            // Determine the last letter
+            char last = 'a' + 2*S;
+
+            // Determine the max index on the board
+            int boardMaxIndex = 2*S+1;
+
+            // Determine longest diagonal letter
+            char longestDiagonalLetter = 'a' + S;
+
+            // Print data
+            // printf("LONGEST DIAGONAL LETTER: %c", longestDiagonalLetter);
+
+            // CORNER CHECKING
+            // Check if it's the first or last letter and the index is 1 or S+1
+            if ((c1 == 'a' || c1 == last) && (index == 1 || index == flMaxIndex)) {
+                return true;
+            }
+
+            // Check if it's a corner on the longest diagonal
+            if (c1 == longestDiagonalLetter && (index == 1 || index == boardMaxIndex)) {
+                return true;
+            }
+
+            return false;
+        }
+
+        bool isCornerMoveLegal(std::string key1, std::string key2) {
+            // Define map points
+            MapPoint *mp1 = new MapPoint(key1);
+            MapPoint *mp2 = new MapPoint(key2);
+
+            // Define index delta
+            int indexDelta = abs(mp1->index - mp2->index);
+            int charDelta = abs(mp1->c - mp2->c);
+
+            // Check if the two points are next to each other
+            if (indexDelta <= 1) {
+                // Move a -> b
+                if (mp1->c == 'a' && mp2->c == 'b') {
+                    return true;
+                }
+
+                // Move on the longest diagonal
+                if (mp1->c == mp2->c) {
+                    return true;
+                }
+
+                // Move from the last letter to the one before
+                if (mp1->c - mp2->c == 1) {
+                    return true;
+                }
+            }
+
+            // No condition was fulfilled
+            return false;
+        }
+
+        // The point is not a corner
+        bool isMoveLegal(int S, std::string key1, std::string key2) {
+            // Check if values are in the board
+            if (!entryExists(key1) || !entryExists(key2)) {
+                printf("ERROR: Entries don't exist");
+                return false;
+            }
+
+            // Define map points
+            MapPoint *mp1 = new MapPoint(key1);
+            MapPoint *mp2 = new MapPoint(key2);
+
+            // Define index delta
+            int indexDelta = abs(mp1->index - mp2->index);
+            int charDelta = abs(mp1->c - mp2->c);
+
+            // Check whether the first field is on the edge
+            if (!isEdge(S, key1)) {
+                printf("ERROR: The first field is not on the edge\n");
+                return false;
+            }
+
+            // Check whether the second field is not on the edge
+            if (isEdge(S, key2)) {
+                printf("ERROR: The second field is on the edge\n");
+                return false;
+            }
+
+            // Check if the first field is a corner
+            if (isCorner(S, key1)) {
+
+                // Check if the corner move is legal
+                if (isCornerMoveLegal(key1, key2)) {
+                    // TODO: Add map checking
+                    printf("SUCCESS: Corner move is legal\n");
+                    return true;
+                }
+
+                printf("ERROR: Corner move is not legal\n");
+                return false;
+
+            }
+
+            // Check non-corner move conditions
+            if (indexDelta <= 1 && charDelta <= 1) {
+                printf("SUCCESS: Move legal\n");
+                return true;
+            }
+
+            printf("ERROR: Conditions were not met\n");
+            return false;
+        }
+
+        void makeMove(std::string key1, std::string key2) {
+            MapPoint *mp1 = new MapPoint(key1);
+            boardMap[key2] = mp1->c;
         }
 
         ~BoardPieces() {}

@@ -48,6 +48,11 @@ class Engine {
 
             // Check the state of the board
             gameRules->checkBoardState(board->getBoard());
+
+
+            // GET VALUES
+            printf("\n\nPRINT VALUES\n\n");
+            board->isMoveLegal(S, "e1", "e2");
         }
 
 };
