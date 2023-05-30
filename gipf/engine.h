@@ -26,7 +26,7 @@ class Engine {
 
     public:
         Engine() {
-            this->board = new BoardPieces();
+            this->board = new BoardPieces(this);
         }
 
         void LOAD_GAME_BOARD() {
@@ -53,6 +53,7 @@ class Engine {
             // GET VALUES
             printf("\n\nPRINT VALUES\n\n");
             board->isMoveLegal(S, "e1", "e2");
+            board->makeMove("d2");
         }
 
 };

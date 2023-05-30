@@ -6,6 +6,9 @@
 #include <sstream>
 #include <unordered_map>
 #include "mapPoint.h"
+#include "engine.h"
+
+class Engine;
 
 
 class BoardPieces {
@@ -17,11 +20,15 @@ class BoardPieces {
     int remainingBlack;
 
     // Reindexed fields of the map
-    std::unordered_map<std::string, Point *> boardMap;
+    std::unordered_map<std::string, char> boardMap;
+
+    // Point to game rules and engine
+    // GameRules *gameRules;
+    Engine *engine;
 
     public:
-        BoardPieces() {
-            // Default constructor  
+        BoardPieces(Engine *engine_) {
+            this->engine = engine_;
         }
 
         void incrementWhite() {
@@ -91,6 +98,15 @@ class BoardPieces {
             
 
             std::cout << std::endl << std::endl;
+         }
+
+
+         void printHashMap() {
+            for (auto kv : boardMap)
+            {
+                std::cout << kv.first;
+            }
+            
          }
 
         void addFreeFields(int S) {
@@ -189,7 +205,7 @@ class BoardPieces {
                             key += character;
                             key += std::to_string(index);
 
-                            insertToTheMap(key, curr);
+                            insertToTheMap(key, curr->c);
 
                             printf("%c%d", character, index);
                             
@@ -208,7 +224,7 @@ class BoardPieces {
                             key += character;
                             key += std::to_string(index);
 
-                            insertToTheMap(key, curr);
+                            insertToTheMap(key, curr->c);
 
                             // printf("%c%d", character, index);
                             std::cout << key;
@@ -230,7 +246,7 @@ class BoardPieces {
             }
         }
 
-        void insertToTheMap(std::string key, Point *val) {
+        void insertToTheMap(std::string key, char val) {
             boardMap[key] = val;
         }
 
@@ -238,8 +254,8 @@ class BoardPieces {
             bool exists = boardMap.count(key);
 
             if (exists) {
-                Point *curr = boardMap[key];
-                std::cout << "FOUND: " << curr->c << std::endl;
+                char curr = boardMap[key];
+                std::cout << "FOUND: " << curr << std::endl;
             } else {
                 std::cout << "DOES not EXIST" << std::endl;
             }
@@ -423,9 +439,11 @@ class BoardPieces {
             return false;
         }
 
-        void makeMove(std::string key1, std::string key2) {
-            MapPoint *mp1 = new MapPoint(key1);
-            boardMap[key2] = mp1->c;
+        void makeMove(std::string dest) {
+            boardMap[dest] = 'B';
+
+            printf("NEW BOARD\n");
+            printHashMap();
         }
 
         ~BoardPieces() {}
