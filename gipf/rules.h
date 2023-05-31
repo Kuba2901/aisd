@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <vector>
 #include "Point.h"
 
@@ -22,78 +23,47 @@ class GameRules {
     // Determine whose turn it is 
     char player;
 
+    // Determine whether the map is correct
+    bool mapCorrect;
+
     public:
         // The default game rules constructor 
-        GameRules(int s_, int k_, int gw_, int gb_) {
-            this->S = s_;
-            this->K = k_;
-            this->GW = gw_;
-            this->GB = gb_;
-        }
+        GameRules();
+
+        virtual void clearData();
+
+        virtual void loadRules();
 
         /*
         @returns
         0 - false
         1 - true
         */
-        int checkRules() {
-            return checkK() && checkGW() && checkGB();
-        }
+        virtual int checkRules();
 
-        int checkK() {
-            return (K > 2 && K < (2*S-1));
-        }
+        virtual int checkK();
 
-        int checkGW() {
-            return GW > 3;
-        }
+        virtual int checkGW();
 
-        int checkGB() {
-            return GB > 3;
-        }
+        virtual int checkGB();
 
-        int getS() {
-            return this->S;
-        }
+        virtual int getS();
 
-        int getK() {
-            return this->K;
-        }
+        virtual int getK();
 
-        int getGW() {
-            return this->GW;
-        }
+        virtual int getGW();
 
-        int getGB() {
-            return this->GB;
-        }
+        virtual int getGB();
 
-        void setS(int s) {
-            this->S = s;
-        }
+        virtual void setS(int s);
 
-        void setK(int k) {
-            this->K = k;
-        }
+        virtual void setK(int k);
 
-        void setGW(int gw) {
-            this->GW = gw;
-        }
+        virtual void setGW(int gw);
 
-        void setGB(int gb) {
-            this->GB = gb;
-        }
+        virtual void setGB(int gb);
 
-        void getOnBoard() {
-            int white, black;
-            char player_;
-
-            std::cin >> white >> black >> player_;
-
-            this->whiteOnBoard = GW - white;
-            this->blackOnBoard = GB - black;
-            this->player = player_;
-        }
+        virtual void getOnBoard();
 
         /*
         @returns
@@ -102,74 +72,11 @@ class GameRules {
         2 - WRONG_BLACK_PAWNS_NUMBER - zła liczba czarnych pionów
         3 - WRONG_BOARD_ROW_LENGTH - zła długość wiersza planszy
         */
-        int checkBoardState(std::vector<std::vector<Point *>> boardPieces) {
-            // Pawn counters
-            int counterWhite = 0;
-            int counterBlack = 0;
-            
-            // TODO: Change later (might not work)
-            int _goal = getUnderscoreGoal();
-            int _counter = 0;
+        virtual int checkBoardState(std::vector<std::vector<Point *>> boardPieces);
 
-            // Count elements
-            for (auto pointRow : boardPieces)
-            {
-                for (auto point : pointRow)
-                {
-                    if (point->c == 'W') {
-                        counterWhite++;
-                    } else if (point->c == 'B') {
-                        counterBlack++;
-                    } else if (point->c == '_') {
-                        _counter++;
-                    }
-                }
-                
-            }
-            
-            // Decrement the goal
-            _goal -= counterWhite + counterBlack;
+        virtual int getUnderscoreGoal();
 
+        virtual bool getMapCorrect();
 
-            // Return the message
-            if (counterWhite != this->whiteOnBoard) {
-                std::cout << "White on board: "  << this->whiteOnBoard << ", counter: " << counterWhite  << std::endl;
-                std::cout << "WRONG_WHITE_PAWNS_NUMBER";
-                return 1;
-            } else if (counterBlack != this->blackOnBoard) {
-                std::cout << "White on board: "  << this->blackOnBoard << ", counter: " << counterWhite  << std::endl;
-                std::cout << "WRONG_BLACK_PAWNS_NUMBER";
-                return 2;
-            } 
-            // Check the len' of each side TODO: 
-            else if (_goal != _counter) {
-                std::cout << "GOAL: "  << _goal << ", counter: " << _counter << std::endl;
-                std::cout << "WRONG_BOARD_ROW_LENGTH";
-                return 3;
-            }
-            else {
-                std::cout << "BOARD_STATE_OK" << std::endl;
-                return 0;
-            }
-            
-            
-        }
-
-        int getUnderscoreGoal() {
-            int g = 0;
-            int i = S - 2;
-
-            while (i >= 0) {
-                int curr = S + i;
-
-                // *2 because of hexagon's symmetry
-                g += 2*curr;
-
-                // Decrement the iterator
-                i--;
-            }
-
-            g += 2 * S - 1;
-            return g;
-        }
+        virtual void printRules();
 };

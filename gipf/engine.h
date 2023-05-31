@@ -1,10 +1,11 @@
 #pragma once
 #include <iostream>
+#include "pieces.h"
 #include "rules.h"
 #include "Point.h"
-#include "pieces.h"
-#include <ncurses.h>
 
+class BoardPieces;
+class GameRules;
 
 class Engine {
     // Keeping track of the current cursor position
@@ -25,35 +26,14 @@ class Engine {
     BoardPieces *board;
 
     public:
-        Engine() {
-            this->board = new BoardPieces(this);
-        }
+        Engine();
+        
+        virtual void LOAD_GAME_BOARD();
 
-        void LOAD_GAME_BOARD() {
-            int S, K, GW, GB;
-            std::cin >> S >> K >> GW >> GB;
+        virtual void PRINT_GAME_BOARD();
 
-            // std::cout << "S: " << S << ", K: " << K << ", GW: " << GW << ", GB: " << GB << std::endl;
+        virtual void processCommands();
 
-            // Create an instance of rules-holding object
-            this->gameRules = new GameRules(
-                S, K, GW, GB
-            );
-
-            // Count the pieces on the board
-            gameRules->getOnBoard();
-
-            // Scan and cache the board
-            this->board->scanBoard(S);
-
-            // Check the state of the board
-            gameRules->checkBoardState(board->getBoard());
-
-
-            // GET VALUES
-            printf("\n\nPRINT VALUES\n\n");
-            board->isMoveLegal(S, "e1", "e2");
-            board->makeMove("d2");
-        }
+        virtual GameRules* getRules();
 
 };
