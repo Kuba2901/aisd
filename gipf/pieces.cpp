@@ -64,7 +64,7 @@ void BoardPieces::scanBoard() {
 
     // printBoard();
 
-    // addFreeFields(S);
+    addFreeFields(S);
     // reindexFields(S);
 
     // ! TESTING
@@ -161,10 +161,10 @@ void BoardPieces::addFreeFields(int S) {
     boardPieces.push_back(bottom);
 
     // Repair indexes
-    for (auto pointRow : boardPieces)
-    {
-        shiftIndexes(&pointRow);
-    }
+    // for (auto pointRow : boardPieces)
+    // {
+    //     shiftIndexes(&pointRow);
+    // }
     
     
 }
