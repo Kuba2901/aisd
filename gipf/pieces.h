@@ -84,7 +84,30 @@ class BoardPieces {
         virtual void clearData();
 
         // Check if any 
-        virtual void findCaptures();
+        virtual void findFlatlineCaptures();
+
+        // Update remaining
+        virtual void updateRemaining(int white, int black);
+
+        virtual void printRemaining();
+
+        virtual void setRemaining();
+
+        // Finding diagonal captures [/]
+        virtual void diagonalCaptures();
+
+        virtual void findInLine(char c, int x, int y, std::vector<Point *> *vec);
+
+        virtual int findFirstDiagonalIndex(int y);
+
+        virtual int findLastDiagonalIndex(int y);
+
+        virtual void captureDiagonal(char c, int x, int y, std::vector<Point *> *vec);
+        virtual void captureReverseDiagonal(char c, int x, int y, std::vector<Point *> *vec);
+
+        virtual void removeCapturedFromBoard(char turn, std::vector<Point *> *blacksToBeCaptured);
+
+        virtual void reverseDiagonalCaptures();
 
         ~BoardPieces() {}
 

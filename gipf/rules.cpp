@@ -186,3 +186,15 @@ void GameRules::printRules() {
     printf("%d %d %d %d\n", S, K, GW, GB);
     printf("%d %d %c\n", delWhite, delBlack, player);
 }
+
+int GameRules::getBlackReserve() {
+    return this->GB - this->blackOnBoard;
+}
+
+int GameRules::getWhiteReserve() {
+    return this->GW - this->whiteOnBoard;
+}
+
+char GameRules::getPlayer() {
+    return this->player;
+}

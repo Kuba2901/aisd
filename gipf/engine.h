@@ -14,10 +14,10 @@ class Engine {
     /*
     @brief The indicator of whose turn it is
     @returns
-    1 - white 
-    0 - black
+    'W' - white 
+    'B' - black
     */
-    int currentlyMoving;
+    char currentlyMoving;
 
     // Game rules
     GameRules *gameRules;
@@ -35,5 +35,9 @@ class Engine {
         virtual void processCommands();
 
         virtual GameRules* getRules();
+
+        virtual char getCurrentlyMoving();
+
+        virtual void changeCurrentlyMoving();
 
 };

@@ -55,6 +55,8 @@ class GameRules {
 
         virtual int getGB();
 
+        virtual char getPlayer();
+
         virtual void setS(int s);
 
         virtual void setK(int k);
@@ -64,6 +66,10 @@ class GameRules {
         virtual void setGB(int gb);
 
         virtual void getOnBoard();
+
+        virtual int getWhiteReserve();
+        
+        virtual int getBlackReserve();
 
         /*
         @returns

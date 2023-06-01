@@ -1,9 +1,15 @@
 WRONG_WHITE_PAWNS_NUMBER
-CHECKING ROW: 1
-CHECKING ROW: 2
-CHECKING ROW: 3
-CHECKING ROW: 4
-POSSIBLE CAPTURE OF BLACKS IN ROW: 4
-CHECKING ROW: 5
-CHECKING ROW: 6
-CHECKING ROW: 7
+POSSIBLE CAPTURE OF BLACKS AT DIAGONAL CONTAINING: (7, 7)
+[P] Pushing white to be captured: (7, 7)
+[P] Pushing white to be captured: (7, 7)
+[C] WHITE CAPTURED!
+[C] WHITE CAPTURED!
+    + + + + +
+   + W _ _ B +
+  + _ _ _ B _ +
+ + B _ _ B _ _ +
++ B W _ B _ _ W +
+ + _ W W _ _ _ +
+  + _ W _ _ _ +
+   + W _ _ B +
+    + + + + +

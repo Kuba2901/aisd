@@ -11,8 +11,12 @@ Engine::Engine() {
     processCommands();
 
     // Find captures
-    this->board->findCaptures();
+    this->board->findFlatlineCaptures();
+    // this->board->diagonalCaptures();
+    this->board->reverseDiagonalCaptures();
 
+    // Print changes
+    this->board->printBoard();
 }
 
 void Engine::LOAD_GAME_BOARD() {
@@ -22,6 +26,12 @@ void Engine::LOAD_GAME_BOARD() {
 
     // Load rules values
     this->gameRules->loadRules();
+
+    // Set the currently moving player
+    this->currentlyMoving = this->gameRules->getPlayer();
+
+    // Set remaining pieces in the board
+    this->board->setRemaining();
 
     // Scan and cache the board
     this->board->scanBoard();
@@ -59,4 +69,16 @@ void Engine::processCommands() {
 
 GameRules* Engine::getRules() {
     return this->gameRules;
+}
+
+char Engine::getCurrentlyMoving() {
+    return this->currentlyMoving;
+}
+
+void Engine::changeCurrentlyMoving() {
+    if (this->currentlyMoving == 'B') {
+        this->currentlyMoving = 'W';
+    } else {
+        this->currentlyMoving = 'B';
+    }
 }
