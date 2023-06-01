@@ -49,7 +49,7 @@ class BoardPieces {
         virtual void addFreeFields(int S);
 
         // Shift indexes while inserting '+' signs
-        virtual void shiftIndexes(std::vector<Point *> *row);
+        virtual void shiftIndexes();
 
         virtual void reindexFields(int S);
 

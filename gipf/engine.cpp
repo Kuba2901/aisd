@@ -11,7 +11,7 @@ Engine::Engine() {
     processCommands();
 
     // Find captures
-    this->board->printBoard();
+    this->board->findCaptures();
 
 }
 

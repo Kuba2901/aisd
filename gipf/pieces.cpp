@@ -48,6 +48,8 @@ void BoardPieces::scanBoard() {
                 row.push_back(new Point(x, y+1, line[x]));
             }
 
+            // Add an extra ' ' to the end of the line
+            row.insert(row.end() - 1, new Point(0, y+1, ' '));;
             boardPieces.push_back(row);
             y++;
         } 
@@ -65,7 +67,7 @@ void BoardPieces::scanBoard() {
     // printBoard();
 
     addFreeFields(S);
-    // reindexFields(S);
+    reindexFields(S);
 
     // ! TESTING
     // printBoard();
@@ -108,26 +110,6 @@ void BoardPieces::addFreeFields(int S) {
     std::vector<Point *> top;
     std::vector<Point *> bottom;
 
-    // Iterate over the top
-    for (size_t x = 0; x < boardPieces[0].size() - 1; x++)
-    {
-        if (boardPieces[0][x + 1]->c != ' ' && x >= S) {
-            top.push_back(new Point(x, 0, '+'));
-        } else {
-            top.push_back(new Point(x, 0, ' '));
-        }
-    }
-
-    
-    // Iterate over the bottom
-    for (size_t x = 0; x < boardPieces[boardPieces.size() - 1].size() - 1; x++)
-    {
-        if (boardPieces[boardPieces.size() - 1][x + 1]->c != ' ' && x >= S) {
-            bottom.push_back(new Point(x, boardPieces.size() + 1, '+'));
-        } else {
-            bottom.push_back(new Point(x ,boardPieces.size() + 1, ' '));
-        }
-    }
 
     for (size_t y = 0; y < boardPieces.size(); y++)
     {
@@ -151,9 +133,29 @@ void BoardPieces::addFreeFields(int S) {
         }
 
         // Push '+' sign to the end
-        boardPieces[y].push_back(new Point(boardPieces[y].size() - 2, y, ' '));
-        boardPieces[y].push_back(new Point(boardPieces[y].size() - 2, y, '+'));
-        
+        // boardPieces[y].insert(boardPieces[y].end() - 1, new Point(boardPieces[y].size() - 2, y, ' '));
+        boardPieces[y].insert(boardPieces[y].end() - 1, new Point(boardPieces[y].size() - 2, y, '+'));
+    }
+
+    // Iterate over the top
+    for (size_t x = 0; x < boardPieces[0].size() - 2; x++)
+    {
+        if (boardPieces[0][x + 1]->c != ' ' && x >= S) {
+            top.push_back(new Point(x, 0, '+'));
+        } else {
+            top.push_back(new Point(x, 0, ' '));
+        }
+    }
+
+    
+    // Iterate over the bottom
+    for (size_t x = 0; x < boardPieces[boardPieces.size() - 1].size() - 2; x++)
+    {
+        if (boardPieces[boardPieces.size() - 1][x + 1]->c != ' ' && x >= S) {
+            bottom.push_back(new Point(x, boardPieces.size() + 1, '+'));
+        } else {
+            bottom.push_back(new Point(x ,boardPieces.size() + 1, ' '));
+        }
     }
 
     // Push rows to the board
@@ -161,23 +163,19 @@ void BoardPieces::addFreeFields(int S) {
     boardPieces.push_back(bottom);
 
     // Repair indexes
-    // for (auto pointRow : boardPieces)
-    // {
-    //     shiftIndexes(&pointRow);
-    // }
-    
-    
+    shiftIndexes();
 }
 
 // Shift indexes while inserting '+' signs
-void BoardPieces::shiftIndexes(std::vector<Point *> *row) {
-    for (size_t i = 0; i < row->size() - 1; i++)
+void BoardPieces::shiftIndexes() {
+    for (size_t y = 0; y < boardPieces.size(); y++)
     {
-        int x = row->at(i)->x; 
-        row->at(i + 1)->x = x + 1;
+        for (size_t x = 0; x < boardPieces[y].size() - 1; x++)
+        {
+            boardPieces[y][x]->x = x;
+            boardPieces[y][x]->y = y;
+        }
     }
-    
-    
 }
 
 void BoardPieces::reindexFields(int S) {
@@ -199,7 +197,7 @@ void BoardPieces::reindexFields(int S) {
             std::vector<Point *> pointRow = boardPieces[y];
             Point *curr = pointRow[i];
 
-            
+            // Before the line
             if (i <= 3*S-yCounter) {
                 if (curr->c != ' ') {
                     // Start counting
@@ -224,12 +222,16 @@ void BoardPieces::reindexFields(int S) {
                     
                     c++;
 
-                } // else printf("%c", curr->c);
+                } else  {
+                    // Print out the space
+                    // printf("%c", curr->c);
+                }
                 
             } 
             // After the line
             else {
-                if (curr->c != ' ') {
+                // Check the character
+                if (curr->c == 'B' || curr->c == 'W' || curr->c == '_' || curr->c == '+') {
                     char character = c + wordCounter;
                     int index = xCounter;
 
@@ -240,10 +242,10 @@ void BoardPieces::reindexFields(int S) {
                     insertToTheMap(key, curr);
 
                     // printf("%c%d", character, index);
-                    // std::cout << key;
                     c++;
 
                 } else {
+                    // Print out the space
                     // printf("%c", curr->c);
                 }
             }
@@ -258,6 +260,8 @@ void BoardPieces::reindexFields(int S) {
         c = 'a';
     }
 }
+
+
 void BoardPieces::insertToTheMap(std::string key, Point* val) {
     boardMap[key] = val;
 }
@@ -503,5 +507,62 @@ void BoardPieces::printOriginalBoard() {
 }
 
 void BoardPieces::findCaptures() {
+    // Determine vector height
+    int height = boardPieces.size();
+
+    // Define how many pawns in a row for each player
+    int whiteInRow = 0;
+    int blackInRow = 0;
+
+    // Find <-> this way (starting from 1 and ending at -1 because of edges)
+    for (size_t y = 1; y < height - 1; y++)
+    {
+        printf("CHECKING ROW: %d\n", y);
+
+        // Determine row width
+        int width = boardPieces[y].size();
+
+        // Same here
+        for (size_t x = 1; x < width - 1; x++)
+        {
+            // Define the current element
+            Point* curr = boardPieces[y][x];
+
+            if (curr->c == 'W') {
+                // printf("WHITE FOUND\n");
+                whiteInRow++;
+                blackInRow = 0;
+            } 
+            else if (curr->c == 'B') {
+                // printf("BLACK FOUND\n");
+                whiteInRow = 0;
+                blackInRow++;
+            } else if (curr->c == '_') {
+                // printf("RESETING COUNTER\n");
+                blackInRow = 0;
+                whiteInRow = 0;
+            }
+
+            // Check status (TODO: Change from 4 to K)
+            if (whiteInRow == 4) {
+                // 4 whites in a row (capture everying in this row)
+                // TODO: White captures everything in that row
+                printf("POSSIBLE CAPTURE OF BLACKS IN ROW: %d\n", y);
+                break;
+
+            }
+            else if (blackInRow == 4) {
+                // 4 blacks in a row (capture everying in this row)
+                // TODO: Black captures everything in that row
+                printf("POSSIBLE CAPTURE OF WHITES IN ROW: %d\n", y);
+                break;
+            }
+        }
+        
+        // Reset counters
+        whiteInRow = 0;
+        blackInRow = 0;
+
+    }
     
 }
