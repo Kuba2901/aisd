@@ -1,15 +1,20 @@
 WRONG_WHITE_PAWNS_NUMBER
-POSSIBLE CAPTURE OF BLACKS AT DIAGONAL CONTAINING: (7, 7)
-[P] Pushing white to be captured: (7, 7)
-[P] Pushing white to be captured: (7, 7)
+POSSIBLE CAPTURE OF WHITES IN ROW: 4
 [C] WHITE CAPTURED!
 [C] WHITE CAPTURED!
+[C] WHITE CAPTURED!
+[C] WHITE CAPTURED!
+[C] WHITE CAPTURED!
+[C] WHITE CAPTURED!
+[C] WHITE CAPTURED!
+[C] WHITE CAPTURED!
+CHECKED
     + + + + +
    + W _ _ B +
-  + _ _ _ B _ +
- + B _ _ B _ _ +
-+ B W _ B _ _ W +
- + _ W W _ _ _ +
-  + _ W _ _ _ +
+  + _  _ _ _ +
+ + _ _ _ _ _ _ +
++ _ _ _ _ _ _ _ +
+ + _ _ _ _ _ _ +
+  + _ _ _ _ _ +
    + W _ _ B +
     + + + + +

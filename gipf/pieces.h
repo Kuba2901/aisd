@@ -93,8 +93,6 @@ class BoardPieces {
 
         virtual void setRemaining();
 
-        // Finding diagonal captures [/]
-        virtual void diagonalCaptures();
 
         virtual void findInLine(char c, int x, int y, std::vector<Point *> *vec);
 
@@ -102,12 +100,17 @@ class BoardPieces {
 
         virtual int findLastDiagonalIndex(int y);
 
-        virtual void captureDiagonal(char c, int x, int y, std::vector<Point *> *vec);
-        virtual void captureReverseDiagonal(char c, int x, int y, std::vector<Point *> *vec);
 
-        virtual void removeCapturedFromBoard(char turn, std::vector<Point *> *blacksToBeCaptured);
+        virtual void removeCapturedFromBoard(std::vector<Point *> *blacksToBeCaptured);
+
+        // Finding diagonal captures [/]
+        virtual void diagonalCaptures();
+
+        virtual void captureDiagonal(int x, int y, std::vector<Point *> *vec);
 
         virtual void reverseDiagonalCaptures();
+
+        virtual void captureReverseDiagonal(int x, int y, std::vector<Point *> *vec);
 
         ~BoardPieces() {}
 

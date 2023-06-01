@@ -12,7 +12,7 @@ Engine::Engine() {
 
     // Find captures
     this->board->findFlatlineCaptures();
-    // this->board->diagonalCaptures();
+    this->board->diagonalCaptures();
     this->board->reverseDiagonalCaptures();
 
     // Print changes

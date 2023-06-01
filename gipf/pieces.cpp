@@ -64,8 +64,6 @@ void BoardPieces::scanBoard() {
     // Copy the original board to a different structure
     this->originalBoard = boardPieces;
 
-    // printBoard();
-
     addFreeFields(S);
     reindexFields(S);
 
@@ -582,7 +580,7 @@ void BoardPieces::findFlatlineCaptures() {
         }
 
         // Remove captured pieces from the board
-        removeCapturedFromBoard('B', &captured);
+        removeCapturedFromBoard(&captured);
         
         // Reset counters and vectors
         whiteInRow = 0;
@@ -592,7 +590,10 @@ void BoardPieces::findFlatlineCaptures() {
     
 }
 
-void BoardPieces::removeCapturedFromBoard(char turn, std::vector<Point *> *captured) {
+void BoardPieces::removeCapturedFromBoard(std::vector<Point *> *captured) {
+    // Define who's turn it is
+    char turn = this->engine->getCurrentlyMoving();
+
     // Create counters
     int whiteCounter = 0;
     int blackCounter = 0;
@@ -687,118 +688,55 @@ void BoardPieces::findInLine(char c, int x, int y, std::vector<Point *> *vec) {
 }
 
 
-void BoardPieces::captureDiagonal(char c, int x, int y, std::vector<Point *> *captured) {
-    int K = this->engine->getRules()->getK();
+void BoardPieces::captureDiagonal(int x, int y, std::vector<Point *> *vec) {
+    // Define diagonal values
+    int diagonalX = x;
+    int diagonalY = y;
 
-    // Define local variables using given values
-    int diagX = x;
-    int diagY = y;
+    // Go down-right
+    while (boardPieces[diagonalY][diagonalX]->c != '+') {
+        // Get the current point
+        Point *curr = boardPieces[diagonalY][diagonalX];
 
-    // Get the other char
-    char otherChar = c == 'B' ? 'W' : 'B';
-
-    // Iterate in the top left direction
-    while (boardPieces[diagY][diagX]->c != '+') {
-        // Determine the current point
-        Point *curr = boardPieces[diagY][diagX];
-
-        // Check whether the point is a pawn of another player
-        if (curr->c == otherChar || curr->c == c) {
-            // if so, push the point to the vector
-            printf("[P] Pushing %s to be captured: (%d, %d)\n", curr->c == 'B' ? "black": "white", diagX, diagY);
-            captured->push_back(curr);
-        } 
-        // if the point is not other player's pawn, break and stop the capture
+        // check whether a piece was encountered
+        if (curr->c == 'W' || curr->c == 'B') {
+            vec->push_back(curr);
+        }
+        // break on '_' encountered
         else if (curr->c == '_') {
             break;
         }
 
-        // Move to the top left
-        diagX--;
-        diagY--;
+        // Move top-right
+        diagonalX++;
+        diagonalY++;
     }
 
-    // Reset the values
-    diagX = x;
-    diagY = y;
+    // Reset values
+    diagonalX = x;
+    diagonalY = y;
 
-    // Iterate in the down right direction until a '+' is encountered
-    while (boardPieces[diagY][diagX]->c != '+') {
-        // Determine the current point
-        Point *curr = boardPieces[diagY][diagX];
+    // Go top-left
+    while (boardPieces[diagonalY][diagonalX]->c != '+') {
+        // Get the current point
+        Point *curr = boardPieces[diagonalY][diagonalX];
 
-        // Check whether the point is a pawn of another player
-        if (curr->c == otherChar || curr->c == c) {
-            // if so, push the point to the vector
-            printf("[P] Pushing %s to be captured: (%d, %d)\n", curr->c == 'B' ? "black": "white", diagX, diagY);
-            captured->push_back(curr);
-        } 
-        // if the point is not other player's pawn, break and stop the capture
+        // check whether a piece was encountered
+        if (curr->c == 'W' || curr->c == 'B') {
+            vec->push_back(curr);
+        }
+        // break on '_' encountered
         else if (curr->c == '_') {
             break;
         }
 
-        // Move to the top left
-        diagX++;
-        diagY++;
-    }
-}
-
-void BoardPieces::captureReverseDiagonal(char c, int x, int y, std::vector<Point *> *captured) {
-    int K = this->engine->getRules()->getK();
-
-    // Define local variables using given values
-    int diagX = x;
-    int diagY = y;
-
-    // Get the other char
-    char otherChar = c == 'B' ? 'W' : 'B';
-
-    // Iterate in the top right direction
-    while (boardPieces[diagY][diagX]->c != '+') {
-        // Determine the current point
-        Point *curr = boardPieces[diagY][diagX];
-
-        // Check whether the point is a pawn of another player
-        if (curr->c == otherChar || curr->c == c) {
-            // if so, push the point to the vector
-            printf("[P] Pushing %s to be captured: (%d, %d)\n", curr->c == 'B' ? "black": "white", diagX, diagY);
-            captured->push_back(curr);
-        } 
-        // if the point is not other player's pawn, break and stop the capture
-        else if (curr->c == '_') {
-            break;
-        }
-
-        // Move to the top right
-        diagX++;
-        diagY--;
+        // Move down-left
+        diagonalX--;
+        diagonalY--;
     }
 
-    // Reset the values
-    diagX = x;
-    diagY = y;
-
-    // Iterate in the down right direction until a '+' is encountered
-    while (boardPieces[diagY][diagX]->c != '+') {
-        // Determine the current point
-        Point *curr = boardPieces[diagY][diagX];
-
-        // Check whether the point is a pawn of another player
-        if (curr->c == otherChar || curr->c == c) {
-            // if so, push the point to the vector
-            printf("[P] Pushing %s to be captured: (%d, %d)\n", curr->c == 'B' ? "black": "white", diagX, diagY);
-            captured->push_back(curr);
-        } 
-        // if the point is not other player's pawn, break and stop the capture
-        else if (curr->c == '_') {
-            break;
-        }
-
-        // Move to the bottom left
-        diagX--;
-        diagY++;
-    }
+    // Remove captured from the board
+    removeCapturedFromBoard(vec);
 }
 
 
@@ -816,25 +754,30 @@ void BoardPieces::diagonalCaptures() {
     // Define vectors of points to be captured
     std::vector<Point *> captured;
 
-    // Iterate over the board (1 and -1 to ignore edges)
+    // Iterate from the top (1 and -1 to ignore the '+' rows)
     for (size_t y = 1; y < height - 1; y++)
     {
+        // Get the starting point
+        int start = findFirstDiagonalIndex(y);
 
-        for (size_t x = findFirstDiagonalIndex(y); x < findLastDiagonalIndex(y); x++)
+        // Get the width of the row
+        int width = boardPieces[y].size();
+
+        // Iterate from left to right
+        for (size_t x = start; x < width; x++)
         {
             // Ignore spaces
             if (boardPieces[y][x]->c == ' ') continue;
 
-            // Iterate on the diagonal
-            int diagX = x;
-            int diagY = y;
+            // Define diagonal values
+            int diagonalX = x;  
+            int diagonalY = y;
 
-            while (diagY < height && diagX < boardPieces[diagY].size() && boardPieces[diagY][diagX]->c != '+') {
-                // Get point under coordinates
-                Point *curr = boardPieces[diagY][diagX];
-                // printf("%c ", curr->c);
+            while (diagonalY < height && diagonalX < boardPieces[diagonalY].size() && boardPieces[diagonalY][diagonalX]->c != '+') {
+                // Get the point
+                Point *curr = boardPieces[diagonalY][diagonalX];
 
-                // Determine which character
+                // Increment point with a certain character
                 if (curr->c == 'B') {
                     blackInRow++;
                     whiteInRow = 0;
@@ -842,44 +785,40 @@ void BoardPieces::diagonalCaptures() {
                 else if (curr->c == 'W') {
                     whiteInRow++;
                     blackInRow = 0;
-                } else if (curr->c == '_') {
+                }
+                else if (curr->c == '_') {
                     blackInRow = 0;
                     whiteInRow = 0;
                 }
 
-                // Detect possible captures
+                // Check states
                 if (whiteInRow == K) {
-                    // 4 whites in a row (capture everying in this row)
-                    // TODO: White captures everything in that row
-                    printf("POSSIBLE CAPTURE OF BLACKS AT DIAGONAL CONTAINING: (%d, %d)\n", diagX, diagY);
+                    // White has reached the K
+                    // TODO: Find everything connected in this diagonal
+                    captureDiagonal(diagonalX, diagonalY, &captured);
 
-                    // Find all pawns adjacent to the white_row
-                    // 1. To the right
-                    captureDiagonal('W', diagX, diagY, &captured);
+                    // Reset the counters
+                    whiteInRow = 0;
+                    blackInRow = 0;
+                }
+                else if (blackInRow == K) {
+                    // Black has reached the K
+                    // TODO: Find everything connected in this diagonals
+                    captureDiagonal(diagonalX, diagonalY, &captured);
 
-                    // Reset rows
+                    // Reset the counters
                     whiteInRow = 0;
                     blackInRow = 0;
                 }
 
-                // Increment diagonal iterators
-                diagY++;
-                diagX++;
-            }
+                // Move down-left
+                diagonalX++;
+                diagonalY++;
+            }   
 
-
-            // Remove captured from the board
-            removeCapturedFromBoard(this->engine->getCurrentlyMoving(), &captured);
-
-            // Reset counters and vectors
+            // Clear the vector
             captured.clear();
-            whiteInRow = 0;
-            blackInRow = 0;
-
-            // printf("END REACHED: (%d, %d)\n", diagX, diagY);
         }
-
-        // printf("\n\n");
     }
 }
 
@@ -924,25 +863,32 @@ void BoardPieces::reverseDiagonalCaptures() {
     // Define vectors of points to be captured
     std::vector<Point *> captured;
 
-    // Iterate over the board (1 and -1 to ignore edges)
+    // Iterate from the top (1 and -1 to ignore the '+' rows)
     for (size_t y = 1; y < height - 1; y++)
     {
+        // Get the starting point
+        int start = findFirstDiagonalIndex(y);
 
-        for (size_t x = findFirstDiagonalIndex(y); x < findLastDiagonalIndex(y); x++)
+        // Get the width of the row
+        int width = boardPieces[y].size();
+
+        // Iterate from left to right
+        for (size_t x = start; x < width; x++)
         {
             // Ignore spaces
             if (boardPieces[y][x]->c == ' ') continue;
 
-            // Iterate on the diagonal
-            int diagX = x;
-            int diagY = y;
+            // Define diagonal values
+            int diagonalX = x;  
+            int diagonalY = y;
 
-            while (diagY < height && diagX < boardPieces[diagY].size() && boardPieces[diagY][diagX]->c != '+') {
-                // Get point under coordinates
-                Point *curr = boardPieces[diagY][diagX];
-                // printf("%c ", curr->c);
+            // Define rules
 
-                // Determine which character
+            while (diagonalY < height && diagonalX < boardPieces[diagonalY].size() && boardPieces[diagonalY][diagonalX]->c != '+') {
+                // Get the point
+                Point *curr = boardPieces[diagonalY][diagonalX];
+
+                // Increment point with a certain character
                 if (curr->c == 'B') {
                     blackInRow++;
                     whiteInRow = 0;
@@ -950,56 +896,90 @@ void BoardPieces::reverseDiagonalCaptures() {
                 else if (curr->c == 'W') {
                     whiteInRow++;
                     blackInRow = 0;
-                } else if (curr->c == '_') {
+                }
+                else if (curr->c == '_') {
                     blackInRow = 0;
                     whiteInRow = 0;
                 }
 
-                // Detect possible captures
+                // Check states
                 if (whiteInRow == K) {
-                    // 4 whites in a row (capture everying in this row)
-                    // TODO: White captures everything in that row
-                    printf("POSSIBLE CAPTURE OF BLACKS AT DIAGONAL CONTAINING: (%d, %d)\n", diagX, diagY);
+                    // White has reached the K
+                    // TODO: Find everything connected in this diagonal
+                    captureReverseDiagonal(diagonalX, diagonalY, &captured);
 
-                    // Find all pawns adjacent to the white_row
-                    // 1. To the right
-                    captureReverseDiagonal('W', diagX, diagY, &captured);
-
-                    // Reset rows
+                    // Reset the counters
                     whiteInRow = 0;
                     blackInRow = 0;
                 }
                 else if (blackInRow == K) {
-                    // 4 blacks in a row (capture everying in this row)
-                    // TODO: Black captures everything in that row
-                    printf("POSSIBLE CAPTURE OF WHITES AT DIAGONAL CONTAINING: (%d, %d)\n", diagX, diagY);
+                    // Black has reached the K
+                    // TODO: Find everything connected in this diagonals
+                    captureReverseDiagonal(diagonalX, diagonalY, &captured);
 
-                    // Find all pawns adjacent to the white_row
-                    captureReverseDiagonal('W', diagX, diagY, &captured);
-
-                    // Reset rows
+                    // Reset the counters
                     whiteInRow = 0;
                     blackInRow = 0;
                 }
 
-                // Increment diagonal iterators
-                diagY++;
-                diagX++;
-            }
+                // Move top-right
+                diagonalX++;
+                diagonalY--;
+            }   
 
-
-            // Remove captured from the board
-            removeCapturedFromBoard(this->engine->getCurrentlyMoving(), &captured);
-
-            // Reset counters and vectors
+            // Clear the vector
             captured.clear();
-            whiteInRow = 0;
-            blackInRow = 0;
-
-            // printf("END REACHED: (%d, %d)\n", diagX, diagY);
         }
-
-        // printf("\n\n");
     }
 }
 
+void BoardPieces::captureReverseDiagonal(int x, int y, std::vector<Point *> *vec) {
+    // Define diagonal values
+    int diagonalX = x;
+    int diagonalY = y;
+
+    // Go top-right
+    while (boardPieces[diagonalY][diagonalX]->c != '+') {
+        // Get the current point
+        Point *curr = boardPieces[diagonalY][diagonalX];
+
+        // check whether a piece was encountered
+        if (curr->c == 'W' || curr->c == 'B') {
+            vec->push_back(curr);
+        }
+        // break on '_' encountered
+        else if (curr->c == '_') {
+            break;
+        }
+
+        // Move top-right
+        diagonalX++;
+        diagonalY--;
+    }
+
+    // Reset values
+    diagonalX = x;
+    diagonalY = y;
+
+    // Go down-left
+    while (boardPieces[diagonalY][diagonalX]->c != '+') {
+        // Get the current point
+        Point *curr = boardPieces[diagonalY][diagonalX];
+
+        // check whether a piece was encountered
+        if (curr->c == 'W' || curr->c == 'B') {
+            vec->push_back(curr);
+        }
+        // break on '_' encountered
+        else if (curr->c == '_') {
+            break;
+        }
+
+        // Move down-left
+        diagonalX--;
+        diagonalY++;
+    }
+
+    // Remove captured from the board
+    removeCapturedFromBoard(vec);
+}
