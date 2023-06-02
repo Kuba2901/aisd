@@ -1,10 +1,11 @@
 #pragma once
 #include <iostream>
+#include "pieces.h"
 #include "rules.h"
 #include "Point.h"
-#include "pieces.h"
-#include <ncurses.h>
 
+class BoardPieces;
+class GameRules;
 
 class Engine {
     // Keeping track of the current cursor position
@@ -13,10 +14,10 @@ class Engine {
     /*
     @brief The indicator of whose turn it is
     @returns
-    1 - white 
-    0 - black
+    'W' - white 
+    'B' - black
     */
-    int currentlyMoving;
+    char currentlyMoving;
 
     // Game rules
     GameRules *gameRules;
@@ -25,34 +26,24 @@ class Engine {
     BoardPieces *board;
 
     public:
-        Engine() {
-            this->board = new BoardPieces();
-        }
+        Engine();
+        
+        virtual void LOAD_GAME_BOARD();
 
-        void LOAD_GAME_BOARD() {
-            int S, K, GW, GB;
-            std::cin >> S >> K >> GW >> GB;
+        virtual void PRINT_GAME_BOARD();
 
-            // std::cout << "S: " << S << ", K: " << K << ", GW: " << GW << ", GB: " << GB << std::endl;
+        virtual void processCommands();
 
-            // Create an instance of rules-holding object
-            this->gameRules = new GameRules(
-                S, K, GW, GB
-            );
+        virtual void DO_MOVE(std::string args);
 
-            // Count the pieces on the board
-            gameRules->getOnBoard();
+        virtual GameRules* getRules();
 
-            // Scan and cache the board
-            this->board->scanBoard(S);
+        virtual char getCurrentlyMoving();
 
-            // Check the state of the board
-            gameRules->checkBoardState(board->getBoard());
+        virtual void changeCurrentlyMoving();
 
+        virtual BoardPieces* getBoardPieces();
 
-            // GET VALUES
-            printf("\n\nPRINT VALUES\n\n");
-            board->isMoveLegal(S, "e1", "e2");
-        }
+        virtual void getAllCaptures();
 
 };
