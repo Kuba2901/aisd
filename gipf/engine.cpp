@@ -11,9 +11,14 @@ Engine::Engine() {
     processCommands();
 
     // Find captures
-    this->board->findFlatlineCaptures();
-    this->board->diagonalCaptures();
-    this->board->reverseDiagonalCaptures();
+    // this->board->findFlatlineCaptures();
+    // this->board->diagonalCaptures();
+    // this->board->reverseDiagonalCaptures();
+
+    // this->board->pushFlatRow(true, 0, 4);
+
+    printf("LOCATION\n");
+    // this->board->printPointLocation("a1");
 
     // Print changes
     this->board->printBoard();

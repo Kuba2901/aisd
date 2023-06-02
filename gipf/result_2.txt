@@ -1,19 +1,11 @@
 WRONG_WHITE_PAWNS_NUMBER
-POSSIBLE CAPTURE OF WHITES IN ROW: 4
-[C] WHITE CAPTURED!
-[C] WHITE CAPTURED!
-[C] WHITE CAPTURED!
-[C] WHITE CAPTURED!
-[C] WHITE CAPTURED!
-[C] WHITE CAPTURED!
-[C] WHITE CAPTURED!
-[C] WHITE CAPTURED!
-CHECKED
+LOCATION
+(0, 4) - +
     + + + + +
    + W _ _ B +
-  + _  _ _ _ +
+  + _ _ _ _ _ +
  + _ _ _ _ _ _ +
-+ _ _ _ _ _ _ _ +
++ B W B W _ _ W +
  + _ _ _ _ _ _ +
   + _ _ _ _ _ +
    + W _ _ B +

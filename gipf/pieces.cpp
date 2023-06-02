@@ -459,7 +459,18 @@ bool BoardPieces::isMoveLegal(std::string key1, std::string key2) {
     return false;
 }
 
-void BoardPieces::makeMove( std::string begin, std::string dest) {
+void BoardPieces::makeMove(std::string begin, std::string dest) {
+    if (!isEdge(begin)) {
+        printf("BAD_MOVE_%s_IS_WRONG_STARTING_FIELD", begin.c_str());
+        return;
+    }
+
+    // Field out of bounds
+    if (!entryExists(begin)) {
+        printf("BAD_MOVE_%s_IS_WRONG_INDEX", begin.c_str());
+        return;
+    }
+
     if (isMoveLegal(begin, dest)) {
         printf("\n\nMOVE MADE\n");
         boardMap[dest]->c = 'B';
@@ -982,4 +993,21 @@ void BoardPieces::captureReverseDiagonal(int x, int y, std::vector<Point *> *vec
 
     // Remove captured from the board
     removeCapturedFromBoard(vec);
+}
+
+
+
+
+
+void BoardPieces::pushFlatRow(bool right, int x, int y) {
+    std::vector<Point *> row = boardPieces[y];
+
+}
+
+void BoardPieces::printPointLocation(std::string key) {
+    if (entryExists(key)) {
+        Point *pt = boardMap[key];
+
+        printf("(%d, %d) - %c\n", pt->x, pt->y, pt->c);
+    }
 }

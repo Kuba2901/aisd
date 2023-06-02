@@ -112,6 +112,10 @@ class BoardPieces {
 
         virtual void captureReverseDiagonal(int x, int y, std::vector<Point *> *vec);
 
+        virtual void pushFlatRow(bool right, int x, int y);
+
+        virtual void printPointLocation(std::string key);
+
         ~BoardPieces() {}
 
 };
