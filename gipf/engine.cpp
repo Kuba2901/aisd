@@ -2,26 +2,13 @@
 
 Engine::Engine() {
     // Create an instance of rules
-    this->gameRules = new GameRules();     
+    this->gameRules = new GameRules(this);     
 
     // Instantiate the board
     this->board = new BoardPieces(this);
 
     // Start processing commands
     processCommands();
-
-    // Find captures
-    // this->board->findFlatlineCaptures();
-    // this->board->diagonalCaptures();
-    // this->board->reverseDiagonalCaptures();
-
-    // this->board->pushFlatRow(true, 0, 4);
-
-    printf("LOCATION\n");
-    // this->board->printPointLocation("a1");
-
-    // Print changes
-    this->board->printBoard();
 }
 
 void Engine::LOAD_GAME_BOARD() {
@@ -44,13 +31,17 @@ void Engine::LOAD_GAME_BOARD() {
     // Check the state of the board
     gameRules->checkBoardState(board->getBoard());
 
+    // printf("\n");
+
+    // this->board->printBoard();
+
     // Make a test move
     // board->makeMove("d1", "d2");
 }
 
 void Engine::PRINT_GAME_BOARD() {
     if (this->getRules()->getMapCorrect()) {
-        this->gameRules->printRules();
+        this->board->printValues();
         this->board->printOriginalBoard();
         printf("\n");
     } else {
@@ -66,10 +57,44 @@ void Engine::processCommands() {
         if (line.compare("LOAD_GAME_BOARD") == 1) {
             LOAD_GAME_BOARD();
         } 
-        else if (line.compare("PRINT_GAME_BOARD") == 1) {
+        else if (line.compare("PRINT_GAME_BOARD") == 1 || line == "PRINT_GAME_BOARD") {
             PRINT_GAME_BOARD();
         } 
+        else if (line.find("DO_MOVE") != std::string::npos) {
+            DO_MOVE(line);
+        }
     }
+}
+
+void Engine::DO_MOVE(std::string args) {
+    // Find DO_MOVE
+    size_t movePos = args.find("DO_MOVE");
+
+    // printf("MOVE LINE: %s\n", args.c_str());
+
+    // Get arguments
+    std::string arguments = args.substr(movePos + 8);
+
+    // Extract the arguments
+    std::stringstream ss(arguments);
+
+    std::string from, to;
+    std::getline(ss, from, '-');
+    std::getline(ss, to);
+
+    // Remove endline
+    to.erase(to.length() - 1);
+
+    // Make the move
+    this->board->makeMove(from, to);
+
+    printf("\n");
+
+    // Check captures
+    getAllCaptures();
+
+    // Change the current player
+    this->changeCurrentlyMoving();
 }
 
 GameRules* Engine::getRules() {
@@ -86,4 +111,15 @@ void Engine::changeCurrentlyMoving() {
     } else {
         this->currentlyMoving = 'B';
     }
+}
+
+BoardPieces* Engine::getBoardPieces() {
+    return this->board;
+}
+
+void Engine::getAllCaptures() {
+    this->board->findFlatlineCaptures();
+    this->board->diagonalCaptures();
+    this->board->reverseDiagonalCaptures();
+
 }

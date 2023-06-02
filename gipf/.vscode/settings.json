@@ -56,6 +56,11 @@
         "memory_resource": "cpp",
         "utility": "cpp",
         "ios": "cpp",
-        "deque": "cpp"
+        "deque": "cpp",
+        "__tree": "cpp",
+        "bitset": "cpp",
+        "map": "cpp",
+        "queue": "cpp",
+        "string_view": "cpp"
     }
 }

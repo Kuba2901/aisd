@@ -30,9 +30,9 @@ class BoardPieces {
     public:
         BoardPieces(Engine *engine_);
 
-        virtual void incrementWhite();
+        virtual void decrementWhite();
 
-        virtual void incrementBlack();
+        virtual void decrementBlack();
 
         virtual int getRemainingWhite();
 
@@ -70,6 +70,9 @@ class BoardPieces {
         // The point is not a corner
         virtual bool isMoveLegal(std::string key1, std::string key2);
 
+        // Check whether the destination is adjacent to the starting field
+        virtual bool isFieldAdjacent(std::string key1, std::string key2);
+
         virtual void makeMove( std::string begin, std::string dest);
 
         // Printing out the indexes
@@ -100,21 +103,43 @@ class BoardPieces {
 
         virtual int findLastDiagonalIndex(int y);
 
-
         virtual void removeCapturedFromBoard(std::vector<Point *> *blacksToBeCaptured);
 
-        // Finding diagonal captures [/]
+        // Finding diagonal captures [\]
         virtual void diagonalCaptures();
 
         virtual void captureDiagonal(int x, int y, std::vector<Point *> *vec);
 
+        // This diagonal /
         virtual void reverseDiagonalCaptures();
 
         virtual void captureReverseDiagonal(int x, int y, std::vector<Point *> *vec);
 
-        virtual void pushFlatRow(bool right, int x, int y);
+        void pushFlatRow(bool right, std::string key);
+
+        // This direction [\]
+        void pushDiagonal(bool reverse, bool top, std::string key);
 
         virtual void printPointLocation(std::string key);
+
+        // Decrement player pieces remaining after a move
+        virtual void decrementRemaining();
+
+        // Print values in reaction to PRINT_BOARD
+        virtual void printValues();
+
+        // Check if the board is correct
+        virtual int boardCorrect();
+
+        virtual int findKElementsReverseDiagonal();
+
+        virtual int findKElementsDiagonal();
+
+        virtual int findKElementsFlat();
+
+        virtual bool pointIgnored(Point *pt, std::vector<Point *> ignoredPoints);
+
+        int countRepetitions(std::vector<std::vector<Point *>> rows);
 
         ~BoardPieces() {}
 

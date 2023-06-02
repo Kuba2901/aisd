@@ -1,15 +1,15 @@
 #include "pieces.h"
 
-BoardPieces::BoardPieces(Engine *engine_) {
+BoardPieces::BoardPieces(Engine *engine_): originalBoard(), boardPieces() {
     this->engine = engine_;
 }
 
-void BoardPieces::incrementWhite() {
-    this->remainingWhite++;
+void BoardPieces::decrementWhite() {
+    this->remainingWhite--;
 }
 
-void BoardPieces::incrementBlack() {
-    this->remainingBlack++;
+void BoardPieces::decrementBlack() {
+    this->remainingBlack--;
 }
 
 int BoardPieces::getRemainingWhite() {
@@ -64,11 +64,10 @@ void BoardPieces::scanBoard() {
     // Copy the original board to a different structure
     this->originalBoard = boardPieces;
 
-    addFreeFields(S);
-    reindexFields(S);
-
-    // ! TESTING
-    // printBoard();
+    if (boardPieces.size() > 0) {
+        addFreeFields(S);
+        reindexFields(S);
+    }
 }
 
 void BoardPieces::removeEmpty() {
@@ -107,7 +106,6 @@ void BoardPieces::addFreeFields(int S) {
     // Add the '+' signs to the top and bottom of the board
     std::vector<Point *> top;
     std::vector<Point *> bottom;
-
 
     for (size_t y = 0; y < boardPieces.size(); y++)
     {
@@ -168,7 +166,7 @@ void BoardPieces::addFreeFields(int S) {
 void BoardPieces::shiftIndexes() {
     for (size_t y = 0; y < boardPieces.size(); y++)
     {
-        for (size_t x = 0; x < boardPieces[y].size() - 1; x++)
+        for (size_t x = 0; x < boardPieces[y].size(); x++)
         {
             boardPieces[y][x]->x = x;
             boardPieces[y][x]->y = y;
@@ -276,6 +274,7 @@ void BoardPieces::printField(std::string key) {
 }
 
 bool BoardPieces::entryExists(std::string key) {
+    // printf("ENTRY %s %s\n", key.c_str(), boardMap.count(key) > 0 ? "exists": "doesn't exist");
     return boardMap.count(key);
 }
 
@@ -418,10 +417,6 @@ bool BoardPieces::isMoveLegal(std::string key1, std::string key2) {
     MapPoint *mp1 = new MapPoint(key1);
     MapPoint *mp2 = new MapPoint(key2);
 
-    // Define index delta
-    int indexDelta = abs(mp1->index - mp2->index);
-    int charDelta = abs(mp1->c - mp2->c);
-
     // Check whether the first field is on the edge
     if (!isEdge(key1)) {
         // printf("ERROR: The first field is not on the edge\n");
@@ -449,34 +444,94 @@ bool BoardPieces::isMoveLegal(std::string key1, std::string key2) {
 
     }
 
+    
+
+    // printf("ERROR: Conditions were not met\n");
+    return false;
+}
+
+bool BoardPieces::isFieldAdjacent(std::string key1, std::string key2) {
+    // Define map points
+    MapPoint *mp1 = new MapPoint(key1);
+    MapPoint *mp2 = new MapPoint(key2);
+
+    // Define index delta
+    int indexDelta = abs(mp1->index - mp2->index);
+    int charDelta = abs(mp1->c - mp2->c);
+
     // Check non-corner move conditions
     if (indexDelta <= 1 && charDelta <= 1) {
         // printf("SUCCESS: Move legal\n");
         return true;
     }
 
-    // printf("ERROR: Conditions were not met\n");
     return false;
 }
 
 void BoardPieces::makeMove(std::string begin, std::string dest) {
-    if (!isEdge(begin)) {
-        printf("BAD_MOVE_%s_IS_WRONG_STARTING_FIELD", begin.c_str());
-        return;
-    }
-
-    // Field out of bounds
+    // The first field out of bounds
     if (!entryExists(begin)) {
-        printf("BAD_MOVE_%s_IS_WRONG_INDEX", begin.c_str());
+        printf("BAD_MOVE_%s_IS_WRONG_INDEX\n", begin.c_str());
+        return;
+    }
+    //The second field is out of bounds
+    if (!entryExists(dest)) {
+        printf("BAD_MOVE_%s_IS_WRONG_INDEX\n", dest.c_str());
+        return;
+    }
+    // The first field is not on edge
+    if (!isEdge(begin)) {
+        printf("BAD_MOVE_%s_IS_WRONG_STARTING_FIELD\n", begin.c_str());
+        return;
+    }
+    // The second field is not adjacent
+    if (!isFieldAdjacent(begin, dest)) {
+        printf("UNKNOWN_MOVE_DIRECTION\n");
+        return;
+    }
+    // The destination field is incorrect
+    if (isEdge(dest)) {
+        printf("BAD_MOVE_%s_IS_WRONG_DESTINATION_FIELD\n", dest.c_str());
         return;
     }
 
-    if (isMoveLegal(begin, dest)) {
-        printf("\n\nMOVE MADE\n");
-        boardMap[dest]->c = 'B';
-        printBoard();
-    } else {
-        // printf("BAD_MOVE\n");
+    // TODO: Implement unknown direction error
+
+    // Determine direction if no error was encountered
+    MapPoint *start = new MapPoint(begin);
+    MapPoint *end = new MapPoint(dest);
+
+    // 1. Flat line ->
+    if ((end->index - start->index == 1) && (end->c - start->c == 1)) {
+        // Push to the right;
+        pushFlatRow(true, begin);
+        return;
+    }
+    // 2. Flat line <-
+    else if ((end->index == start->index) && (end->c - start->c == -1)) {
+        // Push to the left;
+        pushFlatRow(false, begin);
+        return;
+    }
+    // 3. Diagonal top-right
+    else if ((end->c == start->c) && (end->index - start->index == 1)) {
+        pushDiagonal(true, true, begin);
+        return;
+    }
+    // 4. Diagonal bottom-left
+    else if ((end->c == start->c) && (end->index - start->index == -1)) {
+        pushDiagonal(true, false, begin);
+        return;
+    }
+    // 5. Diagonal top-left
+    else if ((end->c - start->c == -1) && (end->index - start->index == 1)) {
+        pushDiagonal(false, true, begin);
+        return;
+    }
+    // 6. Diagonal bottom-right
+    else if ((end->c - start->c == 1) && (end->index == start->index)) {
+        pushDiagonal(false, false, begin);
+        return;
     }
 }
 
@@ -560,7 +615,7 @@ void BoardPieces::findFlatlineCaptures() {
             if (whiteInRow == K) {
                 // 4 whites in a row (capture everying in this row)
                 // TODO: White captures everything in that row
-                printf("POSSIBLE CAPTURE OF BLACKS IN ROW: %d\n", y);
+                // printf("POSSIBLE CAPTURE OF BLACKS IN ROW: %d\n", y);
 
                 // Find all pawns adjacent to the white_row
                 findInLine(this->engine->getCurrentlyMoving(), x, y, &captured);
@@ -576,7 +631,7 @@ void BoardPieces::findFlatlineCaptures() {
             else if (blackInRow == K) {
                 // 4 blacks in a row (capture everying in this row)
                 // TODO: Black captures everything in that row
-                printf("POSSIBLE CAPTURE OF WHITES IN ROW: %d\n", y);
+                // printf("POSSIBLE CAPTURE OF WHITES IN ROW: %d\n", y);
 
                 // Find all pawns adjacent to the white_row
                 findInLine(this->engine->getCurrentlyMoving(), x, y, &captured);
@@ -602,8 +657,10 @@ void BoardPieces::findFlatlineCaptures() {
 }
 
 void BoardPieces::removeCapturedFromBoard(std::vector<Point *> *captured) {
+    int K = this->engine->getRules()->getK();
+
     // Define who's turn it is
-    char turn = this->engine->getCurrentlyMoving();
+    char turn = 0;
 
     // Create counters
     int whiteCounter = 0;
@@ -618,22 +675,33 @@ void BoardPieces::removeCapturedFromBoard(std::vector<Point *> *captured) {
         // Determine whose piece it is
         if (curr->c == 'B') 
             blackCounter++;
-        else 
+        else if (curr->c == 'W')
             whiteCounter++;
+
+        if (whiteCounter == K && turn == 0) {
+            turn = 'W';
+        } else if (blackCounter == K && turn == 0) {
+            turn = 'B';
+        }
 
         // Remove from the board
         curr->c = '_';
 
-        printf("[C] %s CAPTURED!\n", curr->c == 'B' ? "BLACK": "WHITE");
+        // printf("[C] %s CAPTURED!\n", curr->c == 'B' ? "BLACK": "WHITE");
     }
 
     // Increment values for players
     if (turn == 'B') {
         // Increment values for the black player
-        updateRemaining(0, blackCounter);
+        // printf("BLACK REMAINING BEFORE CHANGES: %d\n", remainingBlack);
+        this->remainingBlack += blackCounter;
+        // printf("BLACK REMAINING AFTER CHANGES: %d\n", remainingBlack);
+        
     } else {
         // Increment values for the white player
-        updateRemaining(whiteCounter, 0);  
+        // printf("WHiTE REMAINING BEFORE CHANGES: %d\n", remainingWhite);
+        this->remainingWhite += whiteCounter;
+        // printf("WHiTE REMAINING AFTER CHANGES: %d\n", remainingWhite);
     }
     
 }
@@ -718,7 +786,7 @@ void BoardPieces::captureDiagonal(int x, int y, std::vector<Point *> *vec) {
             break;
         }
 
-        // Move top-right
+        // Move down-right
         diagonalX++;
         diagonalY++;
     }
@@ -893,9 +961,10 @@ void BoardPieces::reverseDiagonalCaptures() {
             int diagonalX = x;  
             int diagonalY = y;
 
-            // Define rules
+            // diagonalY >= 0 && 
 
-            while (diagonalY < height && diagonalX < boardPieces[diagonalY].size() && boardPieces[diagonalY][diagonalX]->c != '+') {
+            // Define rules
+            while (diagonalY > 0 &&  diagonalY < height && diagonalX < boardPieces[diagonalY].size() && boardPieces[diagonalY][diagonalX]->c != '+') {
                 // Get the point
                 Point *curr = boardPieces[diagonalY][diagonalX];
 
@@ -996,12 +1065,221 @@ void BoardPieces::captureReverseDiagonal(int x, int y, std::vector<Point *> *vec
 }
 
 
+void BoardPieces::pushFlatRow(bool right, std::string key) {
+    // Get x and y values
+    Point *pt = boardMap[key];
+    int x = pt->x;
+    int y = pt->y;
 
+    // Define a temporary row to store items to be shifted
+    std::vector<Point *> tempRow;
 
+    // Check which direction
+    if (right) {
+        // Get the row width (-1 to avoid the '+' sign)
+        int width = boardPieces[y].size() - 1;
 
-void BoardPieces::pushFlatRow(bool right, int x, int y) {
-    std::vector<Point *> row = boardPieces[y];
+        for (size_t i = x + 1; i < width; i++)
+        {
+            // Get the current point
+            Point *curr = boardPieces[y][i];
 
+            // Ignore spaces
+            if (curr->c == ' ') continue;
+
+            // Get points to be shifted
+            tempRow.push_back(curr);
+
+            // Break on empty space
+            if (curr->c == '_') {
+                break;
+            }
+
+            // If the + sign was encountered, the row is full
+            if (curr->c == '+') {
+                printf("BAD_MOVE_ROW_IS_FULL\n");
+
+                // TODO: Repair
+                // Manually change player
+                this->engine->changeCurrentlyMoving();
+
+                return;
+            }
+        }
+    }
+    // To the left
+    else {
+        // Find items to be shifted
+        for (int i = x - 1; i >= 0; i--)
+        {
+            // Get the current point
+            Point *curr = boardPieces[y][i];
+
+            // Ignore spaces
+            if (curr->c == ' ') continue;
+
+            // Get points to be shifted
+            tempRow.push_back(curr);
+
+            // Break on empty space
+            if (curr->c == '_') {
+                break;
+            }
+
+            // If the + sign was encountered, the row is full
+            if (curr->c == '+') {
+                printf("BAD_MOVE_ROW_IS_FULL\n");
+
+                // TODO: Repair
+                // Manually change player
+                this->engine->changeCurrentlyMoving();
+
+                return;
+            }
+        }
+    }
+
+    // printf("\n\n");
+
+    // Determine whether there was any space empty
+    if (tempRow.size() == 0) {
+        printf("BAD_MOVE_ROW_IS_FULL\n");
+
+        // TODO: Repair
+        // Manually change player
+        this->engine->changeCurrentlyMoving();
+
+        return;
+    }
+
+    // Shift all elements to the right
+    int tempRowLen = tempRow.size();
+
+    // Shift elements to the right
+    for (int i = tempRowLen - 1; i > 0; i--) {
+        tempRow[i]->c = tempRow[i - 1]->c;
+    }
+
+    // Assign the first element as current players piece
+    tempRow[0]->c = engine->getCurrentlyMoving();
+
+    // Decrement remaining pieces
+    decrementRemaining();
+
+    // Indicate success
+    printf("MOVE_COMMITTED\n");
+}
+
+void BoardPieces::pushDiagonal(bool reverse, bool top, std::string key) {
+    // Get x and y values
+    Point *pt = boardMap[key];
+
+    // Get the x and y values
+    int x = pt->x;
+    int y = pt->y;
+
+    // Change the starting position
+    // 1. Top-right
+    if (reverse && top) {
+        x++;
+        y--;
+    } 
+    // 2. Bottom-left
+    else if (reverse && !top) {
+        x--;
+        y++;
+    }
+    // 3. Top-left
+    else if (!reverse && top) {
+        x--;
+        y--;
+    }
+    // 4. Bottom-right
+    else if (!reverse && !top) {
+        x++;
+        y++;
+    }
+
+    // Define board height
+    int height = boardPieces.size();
+
+    // Define a vector to store points to be shifted
+    std::vector<Point *> pts;
+
+    // Check if in bounds
+    while (y < height && x < boardPieces[y].size()) {
+        // Current point on the map
+        Point *curr = boardPieces[y][x];
+
+        // To be sure - ignore spaces
+        if (curr->c == ' ') continue;
+
+        // Get points to be shifted
+        pts.push_back(curr);
+
+        // Break on empty space
+        if (curr->c == '_') {
+            break;
+        }
+
+        // If the + sign was encountered, the row is full
+        if (curr->c == '+') {
+            printf("BAD_MOVE_ROW_IS_FULL\n");
+
+            // TODO: Repair
+            // Manually change player
+            this->engine->changeCurrentlyMoving();
+
+            return;
+        }
+
+        // Determine which kind of diagonal
+        if (!reverse) {
+            // determine direction
+            if (top) {
+                // Decrement the iterators
+                y--;
+                x--;
+            } 
+            // going down
+            else {
+                // Increment the iterators
+                y++;
+                x++;
+            }
+        } else {
+            // determine direction
+            if (top) {
+                // Move top-right
+                x++;
+                y--;
+            } 
+            // going down
+            else {
+                // Move down-left
+                x--;
+                y++;
+            }
+
+        }
+    }
+
+    // Shift all elements to the right
+    int ptsLen = pts.size();
+
+    // Shift elements to the right
+    for (int i = ptsLen - 1; i > 0; i--) {
+        pts[i]->c = pts[i - 1]->c;
+    }
+
+    // Assign the first element as current players piece
+    pts[0]->c = engine->getCurrentlyMoving();
+
+    // Decrement remaining pieces
+    decrementRemaining();
+
+    // Indicate success
+    printf("MOVE_COMMITTED\n");
 }
 
 void BoardPieces::printPointLocation(std::string key) {
@@ -1009,5 +1287,287 @@ void BoardPieces::printPointLocation(std::string key) {
         Point *pt = boardMap[key];
 
         printf("(%d, %d) - %c\n", pt->x, pt->y, pt->c);
+        return;
     }
+
+    printf("POINT DOES NOT EXIST");
+}
+
+void BoardPieces::decrementRemaining() {
+    if (this->engine->getCurrentlyMoving() == 'B') {
+        decrementBlack();
+    } else {
+        decrementWhite();
+    }
+}
+
+void BoardPieces::printValues() {
+    GameRules *rules = this->engine->getRules();
+    int S = rules->getS();
+    int K = rules->getK();
+    int GW = rules->getGW();
+    int GB = rules->getGB();
+
+    printf("%d %d %d %d\n", S, K, GW, GB);
+    printf("%d %d %c\n", remainingWhite, remainingBlack, this->engine->getCurrentlyMoving());
+}
+
+int BoardPieces::boardCorrect() {
+    // Sum all rows
+    int sum = findKElementsDiagonal() + findKElementsFlat() + findKElementsReverseDiagonal();
+    return sum;
+
+}
+
+int BoardPieces::findKElementsReverseDiagonal() {
+    // THIS ORIENTATION - /
+    int height = boardPieces.size();
+
+    // Define the number needed to capture
+    int K = this->engine->getRules()->getK();
+
+    // Define how many pawns in a row for each player
+    int whiteInRow = 0;
+    int blackInRow = 0;
+
+    // Vector of ignored points
+    std::vector<Point *> ignoredPoints;
+
+    // Iterate over the board
+    for (size_t y = 1; y < height - 1; y++)
+    {
+        for (int x = findLastDiagonalIndex(y) - 1; x >= 0; x--)
+        {
+            // Break if an x was encountered
+            if (boardPieces[y][x]->c == '+') break;
+
+            // Ignore spaces
+            if (boardPieces[y][x]->c == ' ') continue;
+
+            // Define diagonal iterators
+            int diagX = x;
+            int diagY = y;
+
+            // Iterate while in bounds
+            while (diagY < height && diagX < boardPieces[diagY].size() && boardPieces[diagY][diagX]->c != '+') {
+                // Get the current point
+                Point *curr = boardPieces[diagY][diagX];
+
+                // Break if the current point has already been marked
+                if (pointIgnored(curr, ignoredPoints)) {
+                    break;
+                }
+
+                if (curr->c == 'B') {
+                    blackInRow++;
+                    whiteInRow = 0;
+                }
+                else if (curr->c == 'W') {
+                    whiteInRow++;
+                    blackInRow = 0;
+                }
+                else if (curr->c == '_') {
+                    blackInRow = 0;
+                    whiteInRow = 0;
+                }
+
+                // Check state
+                if (blackInRow == K || whiteInRow == K) {
+                    // Add final point to ignored
+                    ignoredPoints.push_back(curr);
+                }
+
+                // Move down-left
+                diagX--;
+                diagY++;
+            }
+
+            whiteInRow = 0;
+            blackInRow = 0;
+        }
+        
+    }
+    
+    return ignoredPoints.size();
+}
+
+int BoardPieces::findKElementsDiagonal() {
+    int height = boardPieces.size();
+
+    // Define the number needed to capture
+    int K = this->engine->getRules()->getK();
+
+    // Counters
+    int whiteInRow = 0;
+    int blackInRow = 0;
+
+    // Ignored points vector
+    std::vector<Point *> ignoredPoints;
+
+    // Iterate over the board
+    for (size_t y = 1; y < boardPieces.size() - 1; y++) {
+        // Find the first index
+        for (size_t x = findFirstDiagonalIndex(y); x < boardPieces[y].size() - 1; x++)
+        {
+            // Ignore spaces
+            if (boardPieces[y][x]->c == ' ') continue;
+
+            // Define diagonal iterators
+            int diagX = x;
+            int diagY = y;
+
+            // Iterate while in bounds
+            while (diagY < height && diagX < boardPieces[diagY].size() && boardPieces[diagY][diagX]->c != '+') {
+                // Get the current point
+                Point *curr = boardPieces[diagY][diagX];
+
+                // Break if the current point has already been marked
+                if (pointIgnored(curr, ignoredPoints)) {
+                    break;
+                }
+
+                if (curr->c == 'B') {
+                    blackInRow++;
+                    whiteInRow = 0;
+                }
+                else if (curr->c == 'W') {
+                    whiteInRow++;
+                    blackInRow = 0;
+                }
+                else if (curr->c == '_') {
+                    blackInRow = 0;
+                    whiteInRow = 0;
+                }
+
+                // Check state
+                if (blackInRow == K || whiteInRow == K) {
+                    // Add final point to ignored
+                    ignoredPoints.push_back(curr);
+                }
+
+                // Move down-right
+                diagX++;
+                diagY++;
+            }
+
+            whiteInRow = 0;
+            blackInRow = 0;
+        }
+    }
+
+    return ignoredPoints.size();
+}
+
+int BoardPieces::findKElementsFlat() {
+    // Define the number needed to capture
+    int K = this->engine->getRules()->getK();
+
+    // Determine vector height
+    int height = boardPieces.size();
+    int rowCount = 0;
+
+    // Find <-> this way (starting from 1 and ending at -1 because of edges)
+    for (size_t y = 0; y < height; y++)
+    {
+        // Determine row width
+        int width = boardPieces[y].size();
+
+        // Define how many pawns in a row for each player
+        int whiteInRow = 0;
+        int blackInRow = 0;
+
+        // Same here
+        for (size_t x = 0; x < width; x++)
+        {
+            // Define the current element
+            Point* curr = boardPieces[y][x];
+
+            if (curr->c == 'W') {
+                // printf("WHITE FOUND\n");
+                whiteInRow++;
+                blackInRow = 0;
+            } 
+            else if (curr->c == 'B') {
+                // printf("BLACK FOUND\n");
+                whiteInRow = 0;
+                blackInRow++;
+            } else if (curr->c == '_') {
+                // printf("RESETING COUNTER\n");
+                blackInRow = 0;
+                whiteInRow = 0;
+            }
+
+            // Check status (TODO: Change from 4 to K)
+            if (whiteInRow == K || blackInRow == K) {
+                // printf("FOUND FLAT K\n");
+                // printf("(%d, %d)\n", x, y);
+                rowCount++;
+
+                whiteInRow = 0;
+                blackInRow = 0;
+
+                break;
+            }
+        }
+    }
+
+    return rowCount;
+}
+
+
+bool BoardPieces::pointIgnored(Point *pt, std::vector<Point *> ignoredPoints) {
+    for (auto point : ignoredPoints)
+    {
+        if (point->x == pt->x && point->y == pt->y) return true;
+    }
+
+    return false;   
+}
+
+int BoardPieces::countRepetitions(std::vector<std::vector<Point *>> rows) {
+    // Remove repetitions
+    int repeatedRows = 0;
+
+    if (rows.size() > 0) {
+        // Iterate over vector of vectors
+        for (size_t i = 0; i < rows.size() - 1; i++)
+        {
+            // Get the row
+            std::vector<Point *> row = rows[i];
+            std::vector<Point *> nextRow = rows[i + 1];
+
+            // Iterate over the row
+            for (size_t j = 0; j < row.size(); j++)
+            {
+                // Flag
+                bool repetitionFound = false;
+
+                // Get the point
+                Point *curr = row[j];
+
+                // Iterate over points in the next row
+                for (size_t k = 0; k < nextRow.size(); k++)
+                {
+                    // Get the point in the other row
+                    Point *nextCurr = nextRow[k];
+
+                    // Compare points
+                    if (curr->x == nextCurr->x && curr->y == nextCurr->y) {
+                        repetitionFound = true;
+                        break;
+                    }
+                }
+
+                if (repetitionFound) {
+                    repeatedRows++;
+                    break;
+                }
+                
+            }
+            
+        }
+    }    
+
+
+    return repeatedRows;
 }

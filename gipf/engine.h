@@ -34,10 +34,16 @@ class Engine {
 
         virtual void processCommands();
 
+        virtual void DO_MOVE(std::string args);
+
         virtual GameRules* getRules();
 
         virtual char getCurrentlyMoving();
 
         virtual void changeCurrentlyMoving();
+
+        virtual BoardPieces* getBoardPieces();
+
+        virtual void getAllCaptures();
 
 };

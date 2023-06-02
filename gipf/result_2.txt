@@ -1,12 +1,22 @@
-WRONG_WHITE_PAWNS_NUMBER
-LOCATION
-(0, 4) - +
+
+
     + + + + +
-   + W _ _ B +
-  + _ _ _ _ _ +
- + _ _ _ _ _ _ +
-+ B W B W _ _ W +
- + _ _ _ _ _ _ +
-  + _ _ _ _ _ +
-   + W _ _ B +
+   + B B _ W +
+  + _ B _ _ W +
+ + W W W _ W _ +
++ B B B W W _ W +
+ + _ _ B _ _ _ +
+  + _ B B _ _ +
+   + B _ _ W +
+    + + + + + 
+
+
     + + + + +
+   + B B _ W +
+  + _ B _ _ W +
+ + W W W W W _ +
++ B B B B W _ W +
+ + _ _ B _ _ _ +
+  + _ B B _ _ +
+   + W _ _ W +
+    + + + + + 

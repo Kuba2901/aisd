@@ -2,6 +2,10 @@
 #include <iostream>
 #include <vector>
 #include "Point.h"
+#include "engine.h"
+
+class Engine;
+
 
 class GameRules {
     // The board size expressed as the number of hexagonal board fields on each side of the board
@@ -26,9 +30,12 @@ class GameRules {
     // Determine whether the map is correct
     bool mapCorrect;
 
+    // Engine ptr
+    Engine *engine;
+
     public:
         // The default game rules constructor 
-        GameRules();
+        GameRules(Engine *engine);
 
         virtual void clearData();
 

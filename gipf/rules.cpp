@@ -1,7 +1,9 @@
 #include "rules.h"
 
 // The default game rules constructor 
-GameRules::GameRules() {}
+GameRules::GameRules(Engine *engine) {
+    this->engine = engine;
+}
 
 void GameRules::clearData() {
     this->S = 0;
@@ -86,7 +88,6 @@ void GameRules::getOnBoard() {
     char player_;
 
     std::cin >> white >> black >> player_;
-    // printf("White: %d, Black: %d, Player: %c\n", white, black, player_);
 
     this->whiteOnBoard = GW - white;
     this->blackOnBoard = GB - black;
@@ -128,6 +129,8 @@ int GameRules::checkBoardState(std::vector<std::vector<Point *>> boardPieces) {
     // Decrement the goal
     _goal -= counterWhite + counterBlack;
 
+    int incorrectRows = this->engine->getBoardPieces()->boardCorrect();
+
 
     // Return the message
     if (counterWhite > this->whiteOnBoard) {
@@ -148,8 +151,15 @@ int GameRules::checkBoardState(std::vector<std::vector<Point *>> boardPieces) {
         this->mapCorrect = false;
         return 3;
     }
+    // Check if contains any n rows
+    else if (incorrectRows > 0) {
+        incorrectRows == 1 ? std::cout << "ERROR_FOUND_" << incorrectRows << "_ROW_OF_LENGTH_K " << std::endl : std::cout << "ERROR_FOUND_" << incorrectRows << "_ROWS_OF_LENGTH_K " << std::endl;
+        printf("\n");
+        this->mapCorrect = false;
+        return 0;
+    }
     else {
-        std::cout << "BOARD_STATE_OK" << std::endl;
+        std::cout << "BOARD_STATE_OK\n" << std::endl;
         this->mapCorrect = true;
         return 0;
     }
